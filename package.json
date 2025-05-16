@@ -1,0 +1,37 @@
+{
+  "name": "todoapp-back-end",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon src/index.ts",
+    "build": "tsc -b",
+    "prestart": "npm run build",
+    "start": "node dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AbdullahAhmed6859/TodoApp-Backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/AbdullahAhmed6859/TodoApp-Backend/issues"
+  },
+  "homepage": "https://github.com/AbdullahAhmed6859/TodoApp-Backend#readme",
+  "devDependencies": {
+    "@types/express": "^5.0.1",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.16.0",
+    "zod": "^3.24.4"
+  }
+}
