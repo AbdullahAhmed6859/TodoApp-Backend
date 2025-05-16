@@ -3,6 +3,7 @@ dotenv.config();
 
 import express from "express";
 import cors from "cors";
+import { initDB } from "./db/initDB";
 // import { initDB } from "./db/initDB";
 // import { seedDB } from "./db/seed";
 
@@ -35,9 +36,8 @@ app.get("/", (req, res) => {
 });
 
 app.listen(3000, async () => {
-  // await initDB();
+  await initDB();
   if (ENV === "DEV") {
-    // await seedDB();
     console.log(`App is running on http://localhost:${PORT}`);
   }
 });
