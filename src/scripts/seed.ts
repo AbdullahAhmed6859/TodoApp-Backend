@@ -1,6 +1,8 @@
-import { pool } from "./pool";
+import dotenv from "dotenv";
+dotenv.config();
+import { pool } from "../db/pool";
 
-export async function seedDB() {
+(async function () {
   try {
     console.log("Seeding DB...");
 
@@ -37,9 +39,8 @@ export async function seedDB() {
     } else {
       console.log("⚠️ Tables already seeded");
     }
-
-    console.log("✅ DB Seeded");
   } catch (err) {
     console.error("❌ DB seed error:", err);
   }
-}
+  await pool.end();
+})();

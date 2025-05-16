@@ -1,6 +1,8 @@
-import { pool } from "./pool";
+import dotenv from "dotenv";
+dotenv.config();
+import { pool } from "../db/pool";
 
-export async function initDB() {
+(async function () {
   try {
     console.log("Initializing DB...");
 
@@ -68,4 +70,5 @@ export async function initDB() {
   } catch (err) {
     console.error("❌ DB init error:", err);
   }
-}
+  await pool.end();
+})();
