@@ -4,8 +4,9 @@ dotenv.config();
 import express from "express";
 import cors from "cors";
 import { initDB } from "./db/initDB";
-// import { initDB } from "./db/initDB";
-// import { seedDB } from "./db/seed";
+import userRouter from "./routers/userRouter";
+import todoRouter from "./routers/todoRouter";
+import todoListRouter from "./routers/todoListRouter";
 
 const PORT = process.env.PORT || 3000;
 const ENV = process.env.ENV || "DEV";
@@ -27,6 +28,10 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.json());
+
+app.use("/api/v1/users", userRouter);
+app.use("/api/v1/todos", todoRouter);
+app.use("/api/v1/lists", todoListRouter);
 
 app.get("/", (req, res) => {
   res.status(200).json({
