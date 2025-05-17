@@ -1,8 +1,8 @@
-import { Router } from "express";
+// import { Router } from "express";
 
-const router = Router();
+// const router = Router();
 
-router.post("/signup");
-router.post("/login");
+// router.post("/signup");
+// router.post("/login");
 
-export default router;
+// export default router;

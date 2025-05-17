@@ -13,7 +13,7 @@ import { pool } from "../db/pool";
     if (userCount === 0) {
       const { rows: users } = await pool.query(`
         INSERT INTO users (first_name, last_name, email, password)
-        VALUES 
+        VALUES
           ('Alice', 'Smith', 'alice.smith@example.com', 'password123'),
           ('Bob', 'Johnson', 'bob.johnson@example.com', 'password456')
         RETURNING id;
@@ -21,7 +21,7 @@ import { pool } from "../db/pool";
 
       const { rows: lists } = await pool.query(`
         INSERT INTO todo_lists (user_id, title)
-        VALUES 
+        VALUES
           (${users[0].id}, 'Alice Work Todos'),
           (${users[1].id}, 'Bob Personal Todos')
         RETURNING id;
@@ -29,7 +29,7 @@ import { pool } from "../db/pool";
 
       await pool.query(`
         INSERT INTO todos (list_id, title, description, status)
-        VALUES 
+        VALUES
           (${lists[0].id}, 'Finish project', 'Due next week', 'pending'),
           (${lists[0].id}, 'Email team', 'Summary of updates', 'done'),
           (${lists[1].id}, 'Buy groceries', 'Eggs, Milk, Bread', 'pending');

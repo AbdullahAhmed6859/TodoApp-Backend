@@ -1,13 +1,15 @@
-import { Router } from "express";
+// import { Router } from "express";
 
-const router = Router();
+// const router = Router();
 
-router.post("/");
+// router.get("/");
 
-router.patch("/:listId");
+// router.post("/");
 
-router.delete("/:listId");
+// router.patch("/:listId");
 
-router.post("/:listId/todos");
+// router.delete("/:listId");
 
-export default router;
+// router.post("/:listId/todos");
+
+// export default router;
