@@ -3,8 +3,9 @@ import cors from "cors";
 import { initDB } from "./db/initDB";
 import morgan from "morgan";
 import authRouter from "./routers/authRouter";
+import userRouter from "./routers/userRouter";
 // // import todoRouter from "./routers/todoRouter";
-// // import todoListRouter from "./routers/todoListRouter";
+import todoListsRouter from "./routers/todoListsRouter";
 import { ENV, PORT } from "./config";
 
 const whitelist = ["http://localhost:5173"];
@@ -28,9 +29,9 @@ if (ENV === "DEV") app.use(morgan("dev"));
 
 app.use("/auth", authRouter);
 
-// // app.use("/api/v1/users", userRouter);
+app.use("/users", userRouter);
 // // app.use("/api/v1/todos", todoRouter);
-// // app.use("/api/v1/lists", todoListRouter);
+app.use("/lists", todoListsRouter);
 
 app.get("/", (req, res) => {
   res.status(200).json({

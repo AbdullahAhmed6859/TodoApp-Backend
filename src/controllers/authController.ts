@@ -8,7 +8,9 @@ export const signUp: ExpressHandlerAsync = async (req, res) => {
   const result = signupSchema.safeParse(req.body);
 
   if (!result.success) {
-    res.status(400).json({ errors: result.error.flatten().fieldErrors });
+    res
+      .status(400)
+      .json({ success: false, errors: result.error.flatten().fieldErrors });
     return;
   }
 
@@ -17,7 +19,7 @@ export const signUp: ExpressHandlerAsync = async (req, res) => {
     const existingUser = await findUserByEmail(email);
 
     if (existingUser) {
-      res.status(409).json({ error: "Email already in use" });
+      res.status(409).json({ success: false, error: "Email already in use" });
       return;
     }
 
@@ -32,7 +34,7 @@ export const signUp: ExpressHandlerAsync = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ success: false, error: "Server error" });
   }
 };
 
@@ -40,7 +42,9 @@ export const logIn: ExpressHandlerAsync = async (req, res) => {
   const result = loginSchema.safeParse(req.body);
 
   if (!result.success) {
-    res.status(400).json({ errors: result.error.flatten().fieldErrors });
+    res
+      .status(400)
+      .json({ success: false, errors: result.error.flatten().fieldErrors });
     return;
   }
 
@@ -49,13 +53,17 @@ export const logIn: ExpressHandlerAsync = async (req, res) => {
   try {
     const user = await findUserByEmail(email);
     if (!user) {
-      res.status(401).json({ error: "Invalid email or password" });
+      res
+        .status(401)
+        .json({ success: false, error: "Invalid email or password" });
       return;
     }
 
     const valid = await compare(password, user.password);
     if (!valid) {
-      res.status(401).json({ error: "Invalid email or password" });
+      res
+        .status(401)
+        .json({ success: false, error: "Invalid email or password" });
       return;
     }
 
@@ -73,14 +81,14 @@ export const logIn: ExpressHandlerAsync = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ success: false, error: "Server error" });
   }
 };
 
 export const testProtect: ExpressHandler = (req, res) => {
   res.status(200).json({
     success: true,
-    // userId: req.userId,
+    userId: req.userId,
     message: "Your token is valid",
   });
 };
