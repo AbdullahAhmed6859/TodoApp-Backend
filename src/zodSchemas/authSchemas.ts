@@ -3,11 +3,11 @@ import { z } from "zod";
 export const signupSchema = z.object({
   firstName: z
     .string()
-    .min(1, "First name is required")
+    .min(1, "Required")
     .max(50, "First name can be a maximum of 50 characters"),
   lastName: z
     .string()
-    .min(1, "Last name is required")
+    .min(1, "Required")
     .max(50, "Last name can be a maximum of 50 characters"),
   email: z.string().email("Invalid email"),
   password: z

@@ -3,7 +3,7 @@ dotenv.config();
 
 import express from "express";
 import cors from "cors";
-// import { initDB } from "./db/initDB";
+import { initDB } from "./db/initDB";
 import morgan from "morgan";
 import authRouter from "./routers/authRouter";
 // // import todoRouter from "./routers/todoRouter";
@@ -27,7 +27,8 @@ const corsOptions = {
 const app = express();
 app.use(cors(corsOptions));
 app.use(express.json());
-app.use(morgan("dev"));
+
+if (ENV === "DEV") app.use(morgan("dev"));
 
 app.use("/auth", authRouter);
 
@@ -43,7 +44,7 @@ app.get("/", (req, res) => {
 });
 
 app.listen(3000, async () => {
-  // await initDB();
+  if (ENV === "PROD") await initDB();
   if (ENV === "DEV") {
     console.log(`App is running on http://localhost:${PORT}`);
   }
