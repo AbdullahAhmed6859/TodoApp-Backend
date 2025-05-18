@@ -1,10 +1,10 @@
 import { loginSchema, signupSchema } from "../zodSchemas/authSchemas";
 import { createUser, findUserByEmail } from "../models/userModel";
 import { generateToken } from "../utils/jwt";
-import { Request, Response } from "express";
+import { ExpressHandler, ExpressHandlerAsync } from "../types/expressHandlers";
 import { compare } from "bcrypt";
 
-export async function signUp(req: Request, res: Response) {
+export const signUp: ExpressHandlerAsync = async (req, res) => {
   const result = signupSchema.safeParse(req.body);
 
   if (!result.success) {
@@ -34,9 +34,9 @@ export async function signUp(req: Request, res: Response) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
   }
-}
+};
 
-export async function logIn(req: Request, res: Response) {
+export const logIn: ExpressHandlerAsync = async (req, res) => {
   const result = loginSchema.safeParse(req.body);
 
   if (!result.success) {
@@ -75,4 +75,12 @@ export async function logIn(req: Request, res: Response) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
   }
-}
+};
+
+export const testProtect: ExpressHandler = (req, res) => {
+  res.status(200).json({
+    success: true,
+    // userId: req.userId,
+    message: "Your token is valid",
+  });
+};
