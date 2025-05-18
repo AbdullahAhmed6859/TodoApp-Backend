@@ -9,7 +9,7 @@ export async function createUser(
   const result = await pool.query(
     `INSERT INTO users (first_name, last_name, email, password)
     VALUES ($1, $2, $3, $4)
-    RETURNING first_name, last_name, email`,
+    RETURNING id, first_name, last_name, email`,
     [firstName, lastName, email, hashedPassword]
   );
   console.log(result.rows[0]);

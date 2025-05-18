@@ -1,5 +1,6 @@
 import { loginSchema, signupSchema } from "../zodSchemas/authSchemas";
 import { createUser, findUserByEmail } from "../models/userModel";
+import { generateToken } from "../utils/jwt";
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 
@@ -29,9 +30,12 @@ export async function signUp(req: Request, res: Response) {
       hashedPassword
     );
 
+    const token = generateToken(newUser.id);
+
     res.status(201).json({
       success: true,
       user: newUser,
+      token,
     });
   } catch (err) {
     console.error(err);
@@ -62,7 +66,18 @@ export async function logIn(req: Request, res: Response) {
       return;
     }
 
-    res.status(200).json({ user: { id: user.id, email: user.email } });
+    const token = generateToken(user.id);
+
+    res.status(200).json({
+      success: true,
+      user: {
+        id: user.id,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        email: user.email,
+      },
+      token,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
