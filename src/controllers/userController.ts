@@ -7,8 +7,13 @@ export const getMe: ExpressHandlerAsync = async (req, res, next) => {
 };
 
 export const getUser: ExpressHandlerAsync = async (req, res) => {
-  const id = parseInt(req.params.userId);
-  const user = await findUserById(id);
+  const id = req.params.userId;
+  if (Number.isNaN(id)) {
+    res.status(400).json({ success: false, error: "Invalid User ID" });
+    return;
+  }
+
+  const user = await findUserById(parseInt(id));
   if (!user) {
     res.status(404).json({
       success: true,
