@@ -3,38 +3,49 @@ import { createUser, findUserByEmail } from "../models/userModel";
 import { generateToken } from "../utils/jwt";
 import { ExpressHandler, ExpressHandlerAsync } from "../types/expressHandlers";
 import { compare } from "bcrypt";
+import {
+  badRequest,
+  created,
+  duplicate,
+  ok,
+  serverError,
+  unauthorized,
+} from "../utils/sendResponse";
 
 export const signUp: ExpressHandlerAsync = async (req, res) => {
-  const result = signupSchema.safeParse(req.body);
+  const result = await signupSchema.safeParseAsync(req.body);
 
   if (!result.success) {
-    res
-      .status(400)
-      .json({ success: false, errors: result.error.flatten().fieldErrors });
-    return;
+    const fieldErrors = result.error.flatten().fieldErrors;
+
+    if (fieldErrors.email?.includes("Email already in use")) {
+      return duplicate(
+        res,
+        { email: ["Email already in use"] },
+        `User with this email alread exists`
+      );
+    }
+
+    return badRequest(res, { errors: fieldErrors });
   }
 
   const { firstName, lastName, email, password } = result.data;
   try {
-    const existingUser = await findUserByEmail(email);
-
-    if (existingUser) {
-      res.status(409).json({ success: false, error: "Email already in use" });
-      return;
-    }
-
     const newUser = await createUser(firstName, lastName, email, password);
 
     const token = generateToken(newUser.id);
 
-    res.status(201).json({
-      success: true,
-      user: newUser,
-      token,
-    });
+    return created(
+      res,
+      {
+        user: newUser,
+        token,
+      },
+      "SignUp complete"
+    );
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, error: "Server error" });
+    return serverError(res);
   }
 };
 
@@ -42,53 +53,37 @@ export const logIn: ExpressHandlerAsync = async (req, res) => {
   const result = loginSchema.safeParse(req.body);
 
   if (!result.success) {
-    res
-      .status(400)
-      .json({ success: false, errors: result.error.flatten().fieldErrors });
-    return;
+    return badRequest(res, result.error.flatten().fieldErrors);
   }
 
   const { email, password } = result.data;
 
   try {
     const user = await findUserByEmail(email);
-    if (!user) {
-      res
-        .status(401)
-        .json({ success: false, error: "Invalid email or password" });
-      return;
-    }
-
-    const valid = await compare(password, user.password);
-    if (!valid) {
-      res
-        .status(401)
-        .json({ success: false, error: "Invalid email or password" });
-      return;
+    if (!user || !(await compare(password, user.password))) {
+      return unauthorized(res, "Invalid email or password");
     }
 
     const token = generateToken(user.id);
-
-    res.status(200).json({
-      success: true,
-      user: {
-        id: user.id,
-        firstName: user.first_name,
-        lastName: user.last_name,
-        email: user.email,
+    return ok(
+      res,
+      {
+        user: {
+          id: user.id,
+          firstName: user.first_name,
+          lastName: user.last_name,
+          email: user.email,
+        },
+        token,
       },
-      token,
-    });
+      "User Logged In"
+    );
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, error: "Server error" });
+    return serverError(res);
   }
 };
 
 export const testProtect: ExpressHandler = (req, res) => {
-  res.status(200).json({
-    success: true,
-    userId: req.userId,
-    message: "Your token is valid",
-  });
+  return ok(res, { userId: req.userId });
 };

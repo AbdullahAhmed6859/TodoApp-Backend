@@ -7,6 +7,7 @@ import userRouter from "./routers/userRouter";
 // // import todoRouter from "./routers/todoRouter";
 import todoListsRouter from "./routers/todoListsRouter";
 import { ENV, PORT } from "./config";
+import { ok } from "./utils/sendResponse";
 
 const whitelist = ["http://localhost:5173"];
 const corsOptions = {
@@ -33,12 +34,7 @@ app.use("/users", userRouter);
 // // app.use("/api/v1/todos", todoRouter);
 app.use("/lists", todoListsRouter);
 
-app.get("/", (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Hello World",
-  });
-});
+app.get("/", (req, res) => ok(res, null, "Welcome to TodoApp API"));
 
 app.listen(3000, async () => {
   if (ENV === "PROD") await initDB();
