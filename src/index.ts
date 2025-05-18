@@ -1,6 +1,3 @@
-import dotenv from "dotenv";
-dotenv.config();
-
 import express from "express";
 import cors from "cors";
 import { initDB } from "./db/initDB";
@@ -8,9 +5,8 @@ import morgan from "morgan";
 import authRouter from "./routers/authRouter";
 // // import todoRouter from "./routers/todoRouter";
 // // import todoListRouter from "./routers/todoListRouter";
+import { ENV, PORT } from "./config";
 
-const PORT = process.env.PORT || 3000;
-const ENV = process.env.ENV || "DEV";
 const whitelist = ["http://localhost:5173"];
 const corsOptions = {
   // @ts-ignore

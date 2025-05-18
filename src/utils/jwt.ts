@@ -1,6 +1,5 @@
 import { JwtPayload, sign, verify } from "jsonwebtoken";
-
-const JWT_SECRET = process.env.JWT_SECRET || "your_default_secret";
+import { JWT_SECRET } from "../config";
 
 export function generateToken(id: number): string {
   return sign({ id }, JWT_SECRET) as string;
