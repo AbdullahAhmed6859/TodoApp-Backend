@@ -10,13 +10,13 @@ export const getMe: ExpressHandlerAsync = async (req, res, next) => {
 export const getUser: ExpressHandlerAsync = async (req, res) => {
   const id = req.params.userId;
   if (Number.isNaN(id)) {
-    return badRequest(res, { userId: ["Invalid User ID"] });
+    return badRequest(res, { errors: { userId: ["Invalid User ID"] } });
   }
 
   const user = await findUserById(parseInt(id));
   if (!user) {
-    return notFound(res, `User with id:${id}, does not exist`);
+    return notFound(res, { message: "User does not exist" });
   }
 
-  return ok(res, { user });
+  return ok(res, { data: { user } });
 };

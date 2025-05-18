@@ -17,7 +17,7 @@ import { createListSchema } from "../zodSchemas/todoListsSchemas";
 export const getMyLists: ExpressHandlerAsync = async (req, res) => {
   const userId = req.userId as number;
   const todoLists = await getTodoListsByUser(userId);
-  ok(res, { todoLists });
+  ok(res, { data: todoLists });
 };
 
 export const createMyList: ExpressHandlerAsync = async (req, res) => {
@@ -28,7 +28,7 @@ export const createMyList: ExpressHandlerAsync = async (req, res) => {
   }
   try {
     const newList = await createTodoList(userId, result.data.title);
-    created(res, { newList }, "TodoList created");
+    created(res, { data: newList, message: "TodoList created" });
   } catch (err) {
     console.error(err);
     return serverError(res);
@@ -40,12 +40,12 @@ export const deleteMyList: ExpressHandlerAsync = async (req, res) => {
   const listId = req.params.id;
   console.log(listId);
   if (Number.isNaN(listId)) {
-    return badRequest(res, { id: ["List Id must be a number"] });
+    return badRequest(res, { errors: { id: ["List Id must be a number"] } });
   }
   try {
     const deletedList = await deleteTodoList(userId, parseInt(listId));
     if (!deletedList) {
-      return notFound(res, "List not found");
+      return notFound(res, { message: "List not found" });
     }
 
     return deleted(res);

@@ -19,11 +19,10 @@ export const signUp: ExpressHandlerAsync = async (req, res) => {
     const fieldErrors = result.error.flatten().fieldErrors;
 
     if (fieldErrors.email?.includes("Email already in use")) {
-      return duplicate(
-        res,
-        { email: ["Email already in use"] },
-        `User with this email alread exists`
-      );
+      return duplicate(res, {
+        data: { email: ["Email already in use"] },
+        message: "User with this email alread exists",
+      });
     }
 
     return badRequest(res, { errors: fieldErrors });
@@ -35,14 +34,13 @@ export const signUp: ExpressHandlerAsync = async (req, res) => {
 
     const token = generateToken(newUser.id);
 
-    return created(
-      res,
-      {
+    return created(res, {
+      data: {
         user: newUser,
         token,
       },
-      "SignUp complete"
-    );
+      message: "SignUp complete",
+    });
   } catch (err) {
     console.error(err);
     return serverError(res);
@@ -53,7 +51,7 @@ export const logIn: ExpressHandlerAsync = async (req, res) => {
   const result = loginSchema.safeParse(req.body);
 
   if (!result.success) {
-    return badRequest(res, result.error.flatten().fieldErrors);
+    return badRequest(res, { errors: result.error.flatten().fieldErrors });
   }
 
   const { email, password } = result.data;
@@ -61,13 +59,12 @@ export const logIn: ExpressHandlerAsync = async (req, res) => {
   try {
     const user = await findUserByEmail(email);
     if (!user || !(await compare(password, user.password))) {
-      return unauthorized(res, "Invalid email or password");
+      return unauthorized(res, { message: "Invalid email or password" });
     }
 
     const token = generateToken(user.id);
-    return ok(
-      res,
-      {
+    return ok(res, {
+      data: {
         user: {
           id: user.id,
           firstName: user.first_name,
@@ -76,8 +73,8 @@ export const logIn: ExpressHandlerAsync = async (req, res) => {
         },
         token,
       },
-      "User Logged In"
-    );
+      message: "User Logged In",
+    });
   } catch (err) {
     console.error(err);
     return serverError(res);
@@ -85,5 +82,8 @@ export const logIn: ExpressHandlerAsync = async (req, res) => {
 };
 
 export const testProtect: ExpressHandler = (req, res) => {
-  return ok(res, { userId: req.userId });
+  return ok(res, {
+    data: { userId: req.userId },
+    message: "Auth middleware is working",
+  });
 };
