@@ -11,7 +11,7 @@ const router = Router();
 
 router.use(protect);
 router.route("/").get(getMyLists).post(createMyList);
-router.route("/:id").post(updateMyList).delete(deleteMyList);
+router.route("/:id").put(updateMyList).delete(deleteMyList);
 
 // router.post("/:listId/todos");
 
