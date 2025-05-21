@@ -1,4 +1,8 @@
-import { findUserById, updateUserById } from "../models/userModel";
+import {
+  findUserById,
+  patchUpdateUserById,
+  putUpdateUserById,
+} from "../models/userModel";
 import { ExpressHandlerAsync } from "../types/expressHandlers";
 import {
   notFound,
@@ -7,7 +11,7 @@ import {
   zodBadRequest,
 } from "../utils/sendResponse";
 import { idParams } from "../zodSchemas/common";
-import { updateUserSchema } from "../zodSchemas/userSchemas";
+import { patchUserSchema, putUserSchema } from "../zodSchemas/userSchemas";
 
 export const getMyId: ExpressHandlerAsync = async (req, res, next) => {
   req.params.id = String(req.userId);
@@ -31,19 +35,48 @@ export const getUser: ExpressHandlerAsync = async (req, res) => {
   }
 };
 
-export const updateUser: ExpressHandlerAsync = async (req, res) => {
+export const putUpdateUser: ExpressHandlerAsync = async (req, res) => {
   const paramsResult = idParams.safeParse(req.params);
   if (!paramsResult.success) {
     return zodBadRequest(res, paramsResult);
   }
 
-  const bodyResult = updateUserSchema.safeParse(req.body);
+  const bodyResult = putUserSchema.safeParse(req.body);
   if (!bodyResult.success) {
     return zodBadRequest(res, bodyResult);
   }
 
   try {
-    const updatedUser = await updateUserById(
+    const updatedUser = await putUpdateUserById(
+      paramsResult.data.id,
+      bodyResult.data
+    );
+
+    return ok(res, {
+      data: {
+        updatedUser,
+      },
+      message: "User has been updated",
+    });
+  } catch (err) {
+    console.error(err);
+    return serverError(res);
+  }
+};
+
+export const patchUpdateUser: ExpressHandlerAsync = async (req, res) => {
+  const paramsResult = idParams.safeParse(req.params);
+  if (!paramsResult.success) {
+    return zodBadRequest(res, paramsResult);
+  }
+
+  const bodyResult = patchUserSchema.safeParse(req.body);
+  if (!bodyResult.success) {
+    return zodBadRequest(res, bodyResult);
+  }
+
+  try {
+    const updatedUser = await patchUpdateUserById(
       paramsResult.data.id,
       bodyResult.data
     );

@@ -13,6 +13,4 @@ router.use(protect);
 router.route("/").get(getMyLists).post(createMyList);
 router.route("/:id").put(updateMyList).delete(deleteMyList);
 
-// router.post("/:listId/todos");
-
 export default router;

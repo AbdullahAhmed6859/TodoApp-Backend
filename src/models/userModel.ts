@@ -1,7 +1,11 @@
 import { z } from "zod";
 import { pool } from "../db/pool";
 import { hash } from "bcrypt";
-import { updateUserSchema, signupSchema } from "../zodSchemas/userSchemas";
+import {
+  patchUserSchema,
+  putUserSchema,
+  signupSchema,
+} from "../zodSchemas/userSchemas";
 
 export async function createUser(userDetails: z.infer<typeof signupSchema>) {
   const { firstName, lastName, email, password } = userDetails;
@@ -33,9 +37,9 @@ export async function findUserById(id: number) {
   return result.rows[0];
 }
 
-export async function updateUserById(
+export async function putUpdateUserById(
   id: number,
-  options: z.infer<typeof updateUserSchema>
+  options: z.infer<typeof putUserSchema>
 ) {
   const { firstName, lastName } = options;
   const result = await pool.query(
@@ -46,5 +50,43 @@ export async function updateUserById(
     RETURNING id, first_name, last_name, email;`,
     [firstName, lastName, id]
   );
+  return result.rows[0];
+}
+
+export async function patchUpdateUserById(
+  id: number,
+  options: z.infer<typeof patchUserSchema>
+) {
+  // If no fields to update, return the current user
+  if (Object.keys(options).length === 0) {
+    return findUserById(id);
+  }
+
+  // Build the SET part of the query dynamically
+  const updates: string[] = [];
+  const values: any[] = [];
+  let paramCounter = 1;
+
+  // Iterate over all properties in options
+  for (const [key, value] of Object.entries(options)) {
+    if (value !== undefined) {
+      const dbColumnName = key.replace(/([A-Z])/g, "_$1").toLowerCase();
+      updates.push(`${dbColumnName} = $${paramCounter++}`);
+      values.push(value);
+    }
+  }
+
+  // Add the user ID as the last parameter
+  values.push(id);
+
+  // Construct and execute the query
+  const query = `
+    UPDATE users 
+    SET ${updates.join(", ")}
+    WHERE id = $${paramCounter}
+    RETURNING id, first_name, last_name, email;
+  `;
+
+  const result = await pool.query(query, values);
   return result.rows[0];
 }

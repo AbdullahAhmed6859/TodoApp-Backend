@@ -21,7 +21,7 @@ export const signUp: ExpressHandlerAsync = async (req, res) => {
 
     if (fieldErrors.email?.includes("Email already in use")) {
       return duplicate(res, {
-        data: { email: ["Email already in use"] },
+        errors: { email: ["Email already in use"] },
         message: "User with this email alread exists",
       });
     }

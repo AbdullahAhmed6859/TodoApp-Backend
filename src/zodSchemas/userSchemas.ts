@@ -1,17 +1,16 @@
 import { z } from "zod";
 import { findUserByEmail } from "../models/userModel";
-import { id } from "./common";
+import { id, patchRefine } from "./common";
 
-const firstName = z
-  .string()
-  .min(1, "First Name is Required")
-  .max(50, "First name can be a maximum of 50 characters");
-const lastName = z
-  .string()
-  .min(1, "Last Name is Required")
-  .max(50, "Last name can be a maximum of 50 characters");
+const createNameSchema = (prefix: string) =>
+  z
+    .string()
+    .min(1, `${prefix}name is Required`)
+    .max(50, `${prefix}name can be a maximum of 50 characters`);
 
-const email = z.string().email("Invalid email");
+const firstName = createNameSchema("first ");
+const lastName = createNameSchema("last ");
+const email = z.string().email();
 
 export const signupSchema = z
   .object({
@@ -39,11 +38,10 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
-export const updateUserSchema = z.object({ firstName, lastName });
+export const putUserSchema = z.object({ firstName, lastName });
 
-export const patchUpdateUserSchema = z.object({
-  firstName: firstName.optional(),
-  lastName: firstName.optional(),
-});
+export const patchUserSchema = putUserSchema
+  .partial()
+  .refine(patchRefine, { message: "Atleast one field must be present" });
 
 export const userIdParams = z.object({ userId: id });
