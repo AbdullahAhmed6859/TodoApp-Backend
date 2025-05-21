@@ -2,7 +2,7 @@
 import { Response } from "express";
 import { SafeParseError, SafeParseReturnType } from "zod";
 
-type Data = object | null;
+type Data = { [key: string]: any } | null;
 type Errors = object | null;
 type Message = string | null;
 

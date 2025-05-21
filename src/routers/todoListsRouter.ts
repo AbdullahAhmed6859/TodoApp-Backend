@@ -4,19 +4,14 @@ import {
   createMyList,
   deleteMyList,
   getMyLists,
+  updateMyList,
 } from "../controllers/todoListsController";
 
 const router = Router();
 
 router.use(protect);
-
-router.get("/", getMyLists);
-
-router.post("/", createMyList);
-
-// router.patch("/:listId");
-
-router.delete("/:id", deleteMyList);
+router.route("/").get(getMyLists).post(createMyList);
+router.route("/:id").post(updateMyList).delete(deleteMyList);
 
 // router.post("/:listId/todos");
 

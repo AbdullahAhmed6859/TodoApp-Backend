@@ -2,6 +2,7 @@ import {
   getTodoListsByUserId,
   createTodoList,
   deleteTodoList,
+  updateTodoListForUser,
 } from "../models/todoListsModel";
 import { ExpressHandlerAsync } from "../types/expressHandlers";
 import {
@@ -13,13 +14,16 @@ import {
   zodBadRequest,
 } from "../utils/sendResponse";
 import { idParams } from "../zodSchemas/common";
-import { createListSchema } from "../zodSchemas/todoListsSchemas";
+import {
+  createListSchema,
+  updateListSchema,
+} from "../zodSchemas/todoListsSchemas";
 
 export const getMyLists: ExpressHandlerAsync = async (req, res) => {
   const userId = req.userId as number;
   try {
     const todoLists = await getTodoListsByUserId(userId);
-    ok(res, { data: todoLists });
+    ok(res, { data: { todoLists } });
   } catch (err) {
     console.error(err);
     return serverError(res);
@@ -34,19 +38,47 @@ export const createMyList: ExpressHandlerAsync = async (req, res) => {
   }
   try {
     const newList = await createTodoList(userId, result.data);
-    created(res, { data: newList, message: "TodoList created" });
+    created(res, { data: { newList }, message: "TodoList created" });
   } catch (err) {
     console.error(err);
     return serverError(res);
   }
 };
 
+export const updateMyList: ExpressHandlerAsync = async (req, res) => {
+  const userId = req.userId as number;
+
+  const paramsResult = idParams.safeParse(req.params);
+  if (!paramsResult.success) {
+    return zodBadRequest(res, paramsResult);
+  }
+
+  const bodyResult = updateListSchema.safeParse(req.body);
+  if (!bodyResult.success) {
+    return zodBadRequest(res, bodyResult);
+  }
+
+  const updatedList = await updateTodoListForUser(
+    userId,
+    paramsResult.data.id,
+    bodyResult.data
+  );
+
+  return ok(res, {
+    data: {
+      updatedList,
+    },
+  });
+};
+
 export const deleteMyList: ExpressHandlerAsync = async (req, res) => {
   const userId = req.userId as number;
   const result = idParams.safeParse(req.params);
+
   if (!result.success) {
     return zodBadRequest(res, result);
   }
+
   try {
     const deletedList = await deleteTodoList(userId, result.data.id);
     if (!deletedList) {

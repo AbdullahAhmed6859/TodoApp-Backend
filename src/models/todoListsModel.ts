@@ -1,6 +1,9 @@
 import { z } from "zod";
 import { pool } from "../db/pool";
-import { createListSchema } from "../zodSchemas/todoListsSchemas";
+import {
+  createListSchema,
+  updateListSchema,
+} from "../zodSchemas/todoListsSchemas";
 
 export async function getTodoListsByUserId(userId: number) {
   const result = await pool.query(
@@ -20,6 +23,23 @@ export async function createTodoList(
     [userId, options.title]
   );
   return result.rows[0];
+}
+
+export async function updateTodoListForUser(
+  userId: number,
+  listId: number,
+  options: z.infer<typeof updateListSchema>
+) {
+  const result = await pool.query(
+    `UPDATE todo_lists
+    SET title = $3
+    WHERE
+      user_id = $1 AND
+      id = $2
+    RETURNING id, title;`,
+    [userId, listId, options.title]
+  );
+  return result.rows;
 }
 
 export async function deleteTodoList(userId: number, listId: number) {
