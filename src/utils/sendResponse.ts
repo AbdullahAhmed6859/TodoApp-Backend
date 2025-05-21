@@ -12,6 +12,16 @@ type ResponseOptions = {
   message?: Message;
 };
 
+type ErrorsMessage = {
+  errors?: Errors;
+  message?: Message;
+};
+
+type DataMessage = {
+  data?: Errors;
+  message?: Message;
+};
+
 type ApiResponse = ResponseOptions & {
   success: boolean;
 };
@@ -35,13 +45,13 @@ export function sendResponse(
   return;
 }
 
-export const ok = (res: Response, options: ResponseOptions) =>
+export const ok = (res: Response, options: DataMessage = {}) =>
   sendResponse(res, 200, options);
 
-export const created = (res: Response, options: ResponseOptions) =>
+export const created = (res: Response, options: DataMessage = {}) =>
   sendResponse(res, 201, mergeDefaultMessage(options, { message: "created" }));
 
-export const badRequest = (res: Response, options: ResponseOptions = {}) =>
+export const badRequest = (res: Response, options: ErrorsMessage = {}) =>
   sendResponse(
     res,
     400,
@@ -51,28 +61,28 @@ export const badRequest = (res: Response, options: ResponseOptions = {}) =>
 export const serverError = (res: Response) =>
   sendResponse(res, 500, { message: "Server error" });
 
-export const unauthorized = (res: Response, options: ResponseOptions = {}) =>
+export const unauthorized = (res: Response, options: ErrorsMessage = {}) =>
   sendResponse(
     res,
     401,
     mergeDefaultMessage(options, { message: "Unauthorized" })
   );
 
-export const duplicate = (res: Response, options: ResponseOptions) =>
+export const duplicate = (res: Response, options: ErrorsMessage = {}) =>
   sendResponse(
     res,
     409,
     mergeDefaultMessage(options, { message: "Duplicate Entry" })
   );
 
-export const notFound = (res: Response, options: ResponseOptions = {}) =>
+export const notFound = (res: Response, options: ErrorsMessage = {}) =>
   sendResponse(
     res,
     404,
     mergeDefaultMessage(options, { message: "Resource not found" })
   );
 
-export const deleted = (res: Response) => sendResponse(res, 204, {});
+export const deleted = (res: Response) => sendResponse(res, 204);
 
 export const zodBadRequest = (
   res: Response,

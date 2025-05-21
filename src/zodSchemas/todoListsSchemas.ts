@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { id } from "./common";
 
 const title = z
   .string()
@@ -8,3 +9,5 @@ const title = z
 export const createListSchema = z.object({ title });
 
 export const updateListSchema = z.object({ title });
+
+export const listIdParams = z.object({ listId: id });

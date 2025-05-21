@@ -11,6 +11,6 @@ const router = Router();
 
 router.use(protect);
 router.route("/").get(getMyLists).post(createMyList);
-router.route("/:id").put(updateMyList).delete(deleteMyList);
+router.route("/:listId").put(updateMyList).delete(deleteMyList);
 
 export default router;

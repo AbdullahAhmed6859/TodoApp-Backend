@@ -5,7 +5,7 @@ import {
   updateListSchema,
 } from "../zodSchemas/todoListsSchemas";
 
-export async function getTodoListsByUserId(userId: number) {
+export async function getTodoListsForUser(userId: number) {
   const result = await pool.query(
     `SELECT id, title FROM todo_lists WHERE user_id = $1;`,
     [userId]
@@ -13,7 +13,7 @@ export async function getTodoListsByUserId(userId: number) {
   return result.rows;
 }
 
-export async function createTodoList(
+export async function createTodoListForUser(
   userId: number,
   options: z.infer<typeof createListSchema>
 ) {
@@ -32,7 +32,8 @@ export async function updateTodoListForUser(
 ) {
   const result = await pool.query(
     `UPDATE todo_lists
-    SET title = $3
+    SET title = $3,
+    updated_at = NOW()
     WHERE
       user_id = $1 AND
       id = $2
@@ -42,7 +43,7 @@ export async function updateTodoListForUser(
   return result.rows;
 }
 
-export async function deleteTodoList(userId: number, listId: number) {
+export async function deleteTodoListForUser(userId: number, listId: number) {
   const result = await pool.query(
     `DELETE FROM todo_lists WHERE id = $1 AND user_id = $2
     RETURNING title;`,

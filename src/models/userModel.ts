@@ -44,6 +44,7 @@ export async function putUpdateUserById(
   const { firstName, lastName } = options;
   const result = await pool.query(
     `UPDATE users SET
+    updated_at = NOW(),
     first_name = $1,
     last_name = $2
     WHERE id = $3
@@ -81,8 +82,9 @@ export async function patchUpdateUserById(
 
   // Construct and execute the query
   const query = `
-    UPDATE users 
-    SET ${updates.join(", ")}
+    UPDATE users
+    SET updated_at = NOW(),
+    ${updates.join(", ")}
     WHERE id = $${paramCounter}
     RETURNING id, first_name, last_name, email;
   `;
