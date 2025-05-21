@@ -1,14 +1,13 @@
 import { findUserById, updateUserById } from "../models/userModel";
 import { ExpressHandlerAsync } from "../types/expressHandlers";
 import {
-  badRequest,
-  duplicate,
   notFound,
   ok,
   serverError,
-  zodbadRequest,
+  zodBadRequest,
 } from "../utils/sendResponse";
-import { updateUserSchema, userIdParams } from "../zodSchemas/userSchemas";
+import { idParams } from "../zodSchemas/common";
+import { updateUserSchema } from "../zodSchemas/userSchemas";
 
 export const getMyId: ExpressHandlerAsync = async (req, res, next) => {
   req.params.id = String(req.userId);
@@ -16,8 +15,8 @@ export const getMyId: ExpressHandlerAsync = async (req, res, next) => {
 };
 
 export const getUser: ExpressHandlerAsync = async (req, res) => {
-  const result = userIdParams.safeParse(req.params);
-  if (!result.success) return zodbadRequest(res, result);
+  const result = idParams.safeParse(req.params);
+  if (!result.success) return zodBadRequest(res, result);
 
   try {
     const user = await findUserById(result.data.id);
@@ -33,14 +32,14 @@ export const getUser: ExpressHandlerAsync = async (req, res) => {
 };
 
 export const updateUser: ExpressHandlerAsync = async (req, res) => {
-  const paramsResult = userIdParams.safeParse(req.params);
+  const paramsResult = idParams.safeParse(req.params);
   if (!paramsResult.success) {
-    return zodbadRequest(res, paramsResult);
+    return zodBadRequest(res, paramsResult);
   }
 
   const bodyResult = updateUserSchema.safeParse(req.body);
   if (!bodyResult.success) {
-    return zodbadRequest(res, bodyResult);
+    return zodBadRequest(res, bodyResult);
   }
 
   try {

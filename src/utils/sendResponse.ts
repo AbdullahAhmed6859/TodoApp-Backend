@@ -74,7 +74,7 @@ export const notFound = (res: Response, options: ResponseOptions = {}) =>
 
 export const deleted = (res: Response) => sendResponse(res, 204, {});
 
-export const zodbadRequest = (res: Response, zodResult: SafeParseError<any>) =>
+export const zodBadRequest = (res: Response, zodResult: SafeParseError<any>) =>
   badRequest(res, { errors: zodResult.error.flatten().fieldErrors });
 
 function mergeDefaultMessage(

@@ -10,7 +10,7 @@ import {
   ok,
   serverError,
   unauthorized,
-  zodbadRequest,
+  zodBadRequest,
 } from "../utils/sendResponse";
 
 export const signUp: ExpressHandlerAsync = async (req, res) => {
@@ -26,7 +26,7 @@ export const signUp: ExpressHandlerAsync = async (req, res) => {
       });
     }
 
-    return zodbadRequest(res, result);
+    return zodBadRequest(res, result);
   }
 
   try {
@@ -51,7 +51,7 @@ export const logIn: ExpressHandlerAsync = async (req, res) => {
   const result = loginSchema.safeParse(req.body);
 
   if (!result.success) {
-    return zodbadRequest(res, result);
+    return zodBadRequest(res, result);
   }
 
   const { email, password } = result.data;

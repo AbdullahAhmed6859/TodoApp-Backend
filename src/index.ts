@@ -4,7 +4,6 @@ import { initDB } from "./db/initDB";
 import morgan from "morgan";
 import authRouter from "./routers/authRouter";
 import userRouter from "./routers/userRouter";
-// // import todoRouter from "./routers/todoRouter";
 import todoListsRouter from "./routers/todoListsRouter";
 import { ENV, PORT } from "./config";
 import { ok } from "./utils/sendResponse";

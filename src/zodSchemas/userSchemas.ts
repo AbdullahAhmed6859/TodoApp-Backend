@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { findUserByEmail } from "../models/userModel";
+import { id } from "./common";
 
 const firstName = z
   .string()
@@ -11,8 +12,6 @@ const lastName = z
   .max(50, "Last name can be a maximum of 50 characters");
 
 const email = z.string().email("Invalid email");
-
-const id = z.preprocess((x: unknown) => Number(x), z.number());
 
 export const signupSchema = z
   .object({
@@ -47,4 +46,4 @@ export const patchUpdateUserSchema = z.object({
   lastName: firstName.optional(),
 });
 
-export const userIdParams = z.object({ id });
+export const userIdParams = z.object({ userId: id });
