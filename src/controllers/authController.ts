@@ -1,4 +1,4 @@
-import { loginSchema, signupSchema } from "../zodSchemas/authSchemas";
+import { loginSchema, signupSchema } from "../zodSchemas/userSchemas";
 import { createUser, findUserByEmail } from "../models/userModel";
 import { generateToken } from "../utils/jwt";
 import { ExpressHandler, ExpressHandlerAsync } from "../types/expressHandlers";
@@ -10,6 +10,7 @@ import {
   ok,
   serverError,
   unauthorized,
+  zodbadRequest,
 } from "../utils/sendResponse";
 
 export const signUp: ExpressHandlerAsync = async (req, res) => {
@@ -25,12 +26,11 @@ export const signUp: ExpressHandlerAsync = async (req, res) => {
       });
     }
 
-    return badRequest(res, { errors: fieldErrors });
+    return zodbadRequest(res, result);
   }
 
-  const { firstName, lastName, email, password } = result.data;
   try {
-    const newUser = await createUser(firstName, lastName, email, password);
+    const newUser = await createUser(result.data);
 
     const token = generateToken(newUser.id);
 
@@ -51,7 +51,7 @@ export const logIn: ExpressHandlerAsync = async (req, res) => {
   const result = loginSchema.safeParse(req.body);
 
   if (!result.success) {
-    return badRequest(res, { errors: result.error.flatten().fieldErrors });
+    return zodbadRequest(res, result);
   }
 
   const { email, password } = result.data;

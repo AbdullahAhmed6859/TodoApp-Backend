@@ -1,5 +1,6 @@
 // utils/sendResponse.ts
 import { Response } from "express";
+import { SafeParseError, SafeParseReturnType } from "zod";
 
 type Data = object | null;
 type Errors = object | null;
@@ -72,6 +73,9 @@ export const notFound = (res: Response, options: ResponseOptions = {}) =>
   );
 
 export const deleted = (res: Response) => sendResponse(res, 204, {});
+
+export const zodbadRequest = (res: Response, zodResult: SafeParseError<any>) =>
+  badRequest(res, { errors: zodResult.error.flatten().fieldErrors });
 
 function mergeDefaultMessage(
   options: ResponseOptions = {},

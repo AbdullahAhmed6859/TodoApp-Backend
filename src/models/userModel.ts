@@ -1,12 +1,11 @@
+import { z } from "zod";
 import { pool } from "../db/pool";
 import { hash } from "bcrypt";
+import { updateUserSchema, signupSchema } from "../zodSchemas/userSchemas";
 
-export async function createUser(
-  firstName: string,
-  lastName: string,
-  email: string,
-  password: string
-) {
+export async function createUser(userDetails: z.infer<typeof signupSchema>) {
+  const { firstName, lastName, email, password } = userDetails;
+
   const hashedPassword = await hash(password, 10);
 
   const result = await pool.query(
@@ -30,6 +29,22 @@ export async function findUserById(id: number) {
   const result = await pool.query(
     `SELECT id, first_name, last_name, email FROM users WHERE id = $1;`,
     [id]
+  );
+  return result.rows[0];
+}
+
+export async function updateUserById(
+  id: number,
+  options: z.infer<typeof updateUserSchema>
+) {
+  const { firstName, lastName } = options;
+  const result = await pool.query(
+    `UPDATE users SET
+    first_name = $1,
+    last_name = $2
+    WHERE id = $3
+    RETURNING id, first_name, last_name, email;`,
+    [firstName, lastName, id]
   );
   return result.rows[0];
 }
