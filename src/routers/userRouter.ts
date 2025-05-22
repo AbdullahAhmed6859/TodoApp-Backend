@@ -16,4 +16,4 @@ router
   .put(putUpdateUser)
   .patch(patchUpdateUser);
 // .delete()
-export default router;
+export { router as userRouter };

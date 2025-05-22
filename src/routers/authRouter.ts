@@ -8,4 +8,4 @@ router.post("/signup", signUp);
 router.post("/login", logIn);
 router.get("/testprotect", protect, testProtect);
 
-export default router;
+export { router as authRouter };

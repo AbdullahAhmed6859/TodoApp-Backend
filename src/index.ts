@@ -2,9 +2,9 @@ import express from "express";
 import cors from "cors";
 import { initDB } from "./db/initDB";
 import morgan from "morgan";
-import authRouter from "./routers/authRouter";
-import userRouter from "./routers/userRouter";
-import todoListsRouter from "./routers/todoListsRouter";
+import { authRouter } from "./routers/authRouter";
+import { userRouter } from "./routers/userRouter";
+import { todoListRouter } from "./routers/todoListRouter";
 import { ENV, PORT } from "./config";
 import { ok } from "./utils/sendResponse";
 
@@ -28,10 +28,8 @@ app.use(express.json());
 if (ENV === "DEV") app.use(morgan("dev"));
 
 app.use("/auth", authRouter);
-
 app.use("/users", userRouter);
-// // app.use("/api/v1/todos", todoRouter);
-app.use("/lists", todoListsRouter);
+app.use("/lists", todoListRouter);
 
 app.get("/", (req, res) => ok(res, { message: "Welcome to TodoApp API" }));
 
