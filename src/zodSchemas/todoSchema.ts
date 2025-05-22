@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { id, patchRefine } from "./common";
+import { todoListBelongsToUser } from "../models/todoListsModel";
 
 const title = z
   .string()
@@ -8,9 +9,10 @@ const title = z
 
 const description = z
   .string()
-  .max(1000, "A description can be max 1000 characters");
+  .max(1000, "A description can be max 1000 characters")
+  .default("");
 
-const status = z.boolean();
+const done = z.boolean();
 
 export const todoIdParams = z.object({
   listId: id,
@@ -19,10 +21,10 @@ export const todoIdParams = z.object({
 
 export const createTodoSchema = z.object({
   title,
-  description: description.optional(),
+  description,
 });
 
-export const putUpdateTodoSchema = z.object({ title, description, status });
+export const putUpdateTodoSchema = z.object({ title, description, done });
 
 export const patchUpdateTodoSchema = putUpdateTodoSchema
   .partial()

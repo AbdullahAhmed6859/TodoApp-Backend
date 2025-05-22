@@ -13,6 +13,15 @@ export async function getTodoListsForUser(userId: number) {
   return result.rows;
 }
 
+export const todoListBelongsToUser = async (userId: number, listId: number) => {
+  const listCheck = await pool.query(
+    `SELECT * FROM todo_lists WHERE id = $1 AND user_id = $2`,
+    [listId, userId]
+  );
+
+  return (listCheck.rowCount ?? 0) === 1;
+};
+
 export async function createTodoListForUser(
   userId: number,
   options: z.infer<typeof createListSchema>

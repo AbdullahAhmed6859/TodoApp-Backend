@@ -17,7 +17,6 @@ import {
 import { idParams } from "../zodSchemas/common";
 import {
   createListSchema,
-  listIdParams,
   updateListSchema,
 } from "../zodSchemas/todoListSchemas";
 
@@ -56,7 +55,7 @@ export const createMyList: ExpressHandlerAsync = async (req, res) => {
 export const updateMyList: ExpressHandlerAsync = async (req, res) => {
   const userId = req.userId as number;
 
-  const paramsResult = listIdParams.safeParse(req.params);
+  const paramsResult = idParams.safeParse(req.params);
   if (!paramsResult.success) {
     return zodBadRequest(res, paramsResult);
   }
@@ -65,10 +64,11 @@ export const updateMyList: ExpressHandlerAsync = async (req, res) => {
   if (!bodyResult.success) {
     return zodBadRequest(res, bodyResult);
   }
+  const { id: listId } = paramsResult.data;
 
   const updatedList = await updateTodoListForUser(
     userId,
-    paramsResult.data.listId,
+    listId,
     bodyResult.data
   );
 
@@ -85,14 +85,15 @@ export const updateMyList: ExpressHandlerAsync = async (req, res) => {
 
 export const deleteMyList: ExpressHandlerAsync = async (req, res) => {
   const userId = req.userId as number;
-  const result = listIdParams.safeParse(req.params);
+  const result = idParams.safeParse(req.params);
 
   if (!result.success) {
     return zodBadRequest(res, result);
   }
+  const { id: listId } = result.data;
 
   try {
-    const deletedList = await deleteTodoListForUser(userId, result.data.listId);
+    const deletedList = await deleteTodoListForUser(userId, listId);
     if (!deletedList) {
       return notFound(res, { message: "List not found" });
     }

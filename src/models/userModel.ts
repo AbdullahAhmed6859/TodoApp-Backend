@@ -6,6 +6,8 @@ import {
   putUserSchema,
   signupSchema,
 } from "../zodSchemas/userSchemas";
+import { toCamelCase } from "../utils/toCamelCase";
+import { generateSetQuery } from "../db/generateSetQuery";
 
 export async function createUser(userDetails: z.infer<typeof signupSchema>) {
   const { firstName, lastName, email, password } = userDetails;
@@ -62,22 +64,7 @@ export async function patchUpdateUserById(
   if (Object.keys(options).length === 0) {
     return findUserById(id);
   }
-
-  // Build the SET part of the query dynamically
-  const updates: string[] = [];
-  const values: any[] = [];
-  let paramCounter = 1;
-
-  // Iterate over all properties in options
-  for (const [key, value] of Object.entries(options)) {
-    if (value !== undefined) {
-      const dbColumnName = key.replace(/([A-Z])/g, "_$1").toLowerCase();
-      updates.push(`${dbColumnName} = $${paramCounter++}`);
-      values.push(value);
-    }
-  }
-
-  // Add the user ID as the last parameter
+  const { updates, values, paramCounter } = generateSetQuery(options);
   values.push(id);
 
   // Construct and execute the query

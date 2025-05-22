@@ -7,12 +7,12 @@ import {
   putUpdateMyTodo,
 } from "../controllers/todoController";
 
-const router = Router();
+const router = Router({ mergeParams: true });
 
-router.get("/", getMyTodos);
+router.route("/").get(getMyTodos).post(createMyTodo);
+
 router
   .route("/:todoId")
-  .post(createMyTodo)
   .put(putUpdateMyTodo)
   .patch(patchUpdateMyTodo)
   .delete(deleteMyTodo);
