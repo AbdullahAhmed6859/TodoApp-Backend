@@ -11,56 +11,61 @@ export async function initDB() {
   }
 }
 
-const initQuery = `
-DO $$ BEGIN
-	IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'todo_status') THEN
-    	CREATE TYPE TODO_STATUS AS ENUM ('pending', 'done');
-	END IF;
-END $$;
+const initQuery = `CREATE TABLE IF NOT EXISTS public.users
+(
+    id integer NOT NULL DEFAULT nextval('users_id_seq'::regclass),
+    first_name character varying(50) COLLATE pg_catalog."default" NOT NULL,
+    last_name character varying(50) COLLATE pg_catalog."default" NOT NULL,
+    email text COLLATE pg_catalog."default" NOT NULL,
+    password character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    created_at timestamp with time zone DEFAULT now(),
+    updated_at timestamp with time zone DEFAULT now(),
+    CONSTRAINT users_pkey PRIMARY KEY (id),
+    CONSTRAINT users_email_key UNIQUE (email)
+)
 
-CREATE TABLE IF NOT EXISTS users (
-  id SERIAL PRIMARY KEY,
-  first_name VARCHAR(50) NOT NULL,
-  last_name VARCHAR(50) NOT NULL,
-  email TEXT UNIQUE NOT NULL,
-  password VARCHAR(255) NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now()
-);
+TABLESPACE pg_default;
 
-CREATE TABLE IF NOT EXISTS todo_lists (
-	id SERIAL PRIMARY KEY,
-	user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-	title VARCHAR(100) NOT NULL,
-	created_at TIMESTAMPTZ DEFAULT now(),
- 	updated_at TIMESTAMPTZ DEFAULT now()
-);
+ALTER TABLE IF EXISTS public.users
+    OWNER to postgres;
 
-CREATE TABLE IF NOT EXISTS todos (
-	id SERIAL PRIMARY KEY,
-	list_id INTEGER NOT NULL REFERENCES todo_lists(id) ON DELETE CASCADE,
-	title VARCHAR(100) NOT NULL,
-	description TEXT,
-	status TODO_STATUS DEFAULT 'pending',
-	created_at TIMESTAMPTZ DEFAULT now(),
-  	updated_at TIMESTAMPTZ DEFAULT now()
-);
+CREATE TABLE IF NOT EXISTS public.todo_lists
+(
+    id integer NOT NULL DEFAULT nextval('todo_lists_id_seq'::regclass),
+    user_id integer NOT NULL,
+    title character varying(100) COLLATE pg_catalog."default" NOT NULL,
+    created_at timestamp with time zone DEFAULT now(),
+    updated_at timestamp with time zone DEFAULT now(),
+    CONSTRAINT todo_lists_pkey PRIMARY KEY (id),
+    CONSTRAINT todo_lists_user_id_fkey FOREIGN KEY (user_id)
+        REFERENCES public.users (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE CASCADE
+)
 
-CREATE OR REPLACE VIEW user_todos AS
-SELECT
-  U.id AS user_id,
-  U.first_name,
-  U.last_name,
-  U.email,
-  L.id AS list_id,
-  L.title AS list_title,
-  T.id AS todo_id,
-  T.title AS todo_title,
-  T.description AS todo_description,
-  T.status AS todo_status,
-  T.created_at AS todo_created_at,
-  T.updated_at AS todo_updated_at
-FROM users U
-JOIN todo_lists L ON U.id = L.user_id
-JOIN todos T ON T.list_id = L.id;
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.todo_lists
+    OWNER to postgres;
+
+CREATE TABLE IF NOT EXISTS public.todos
+(
+    id integer NOT NULL DEFAULT nextval('todos_id_seq'::regclass),
+    list_id integer NOT NULL,
+    title character varying(100) COLLATE pg_catalog."default" NOT NULL,
+    description text COLLATE pg_catalog."default" DEFAULT ''::text,
+    created_at timestamp with time zone DEFAULT now(),
+    updated_at timestamp with time zone DEFAULT now(),
+    done boolean NOT NULL DEFAULT false,
+    CONSTRAINT todos_pkey PRIMARY KEY (id),
+    CONSTRAINT todos_list_id_fkey FOREIGN KEY (list_id)
+        REFERENCES public.todo_lists (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE CASCADE
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.todos
+    OWNER to postgres;
 `;

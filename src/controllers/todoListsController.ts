@@ -18,7 +18,7 @@ import {
   createListSchema,
   listIdParams,
   updateListSchema,
-} from "../zodSchemas/todoListsSchemas";
+} from "../zodSchemas/todoListSchemas";
 
 export const getMyLists: ExpressHandlerAsync = async (req, res) => {
   const userId = req.userId as number;

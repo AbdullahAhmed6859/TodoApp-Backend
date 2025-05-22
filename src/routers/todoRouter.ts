@@ -6,10 +6,8 @@ import {
   patchUpdateMyTodo,
   putUpdateMyTodo,
 } from "../controllers/todoController";
-import { protect } from "../middleware/auth";
 
 const router = Router();
-router.use(protect);
 
 router.get("/", getMyTodos);
 router
@@ -19,4 +17,4 @@ router
   .patch(patchUpdateMyTodo)
   .delete(deleteMyTodo);
 
-export {router as todoRouter};
+export { router as todoRouter };

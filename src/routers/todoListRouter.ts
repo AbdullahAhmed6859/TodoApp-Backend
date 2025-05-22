@@ -9,9 +9,9 @@ import {
 import { todoRouter } from "./todoRouter";
 
 const router = Router();
-router.use("/:listId", todoRouter);
-
 router.use(protect);
+router.use("/:listId/todos", todoRouter);
+
 router.route("/").get(getMyLists).post(createMyList);
 router.route("/:listId").put(updateMyList).delete(deleteMyList);
 

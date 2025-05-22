@@ -3,7 +3,7 @@ import { pool } from "../db/pool";
 import {
   createListSchema,
   updateListSchema,
-} from "../zodSchemas/todoListsSchemas";
+} from "../zodSchemas/todoListSchemas";
 
 export async function getTodoListsForUser(userId: number) {
   const result = await pool.query(
