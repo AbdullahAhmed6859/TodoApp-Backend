@@ -6,7 +6,7 @@ import {
 import { ExpressHandlerAsync } from "../types/expressHandlers";
 import { catchAsync } from "../utils/catchAsync";
 import { notFound, ok, zodBadRequest } from "../utils/sendResponse";
-import { idParams } from "../zod-schemas/common";
+import { id, idParams } from "../zod-schemas/common";
 import { patchUserSchema, putUserSchema } from "../zod-schemas/userSchemas";
 
 export const getMyId: ExpressHandlerAsync = async (req, res, next) => {
@@ -15,10 +15,10 @@ export const getMyId: ExpressHandlerAsync = async (req, res, next) => {
 };
 
 export const getUser = catchAsync(async (req, res, next) => {
-  const result = idParams.safeParse(req.params);
-  if (!result.success) return zodBadRequest(res, result);
+  const { id } = idParams.parse(req.params);
 
-  const user = await findUserById(result.data.id);
+  const user = await findUserById(id);
+
   if (!user) {
     return notFound(res, { message: "User does not exist" });
   }
@@ -27,20 +27,10 @@ export const getUser = catchAsync(async (req, res, next) => {
 });
 
 export const putUpdateUser = catchAsync(async (req, res, next) => {
-  const paramsResult = idParams.safeParse(req.params);
-  if (!paramsResult.success) {
-    return zodBadRequest(res, paramsResult);
-  }
+  const { id } = idParams.parse(req.params);
+  const data = putUserSchema.parse(req.body);
 
-  const bodyResult = putUserSchema.safeParse(req.body);
-  if (!bodyResult.success) {
-    return zodBadRequest(res, bodyResult);
-  }
-
-  const updatedUser = await putUpdateUserById(
-    paramsResult.data.id,
-    bodyResult.data
-  );
+  const updatedUser = await putUpdateUserById(id, data);
 
   return ok(res, {
     data: {
@@ -51,20 +41,10 @@ export const putUpdateUser = catchAsync(async (req, res, next) => {
 });
 
 export const patchUpdateUser = catchAsync(async (req, res, next) => {
-  const paramsResult = idParams.safeParse(req.params);
-  if (!paramsResult.success) {
-    return zodBadRequest(res, paramsResult);
-  }
+  const { id } = idParams.parse(req.params);
+  const data = patchUserSchema.parse(req.body);
 
-  const bodyResult = patchUserSchema.safeParse(req.body);
-  if (!bodyResult.success) {
-    return zodBadRequest(res, bodyResult);
-  }
-
-  const updatedUser = await patchUpdateUserById(
-    paramsResult.data.id,
-    bodyResult.data
-  );
+  const updatedUser = await patchUpdateUserById(id, data);
 
   return ok(res, {
     data: {

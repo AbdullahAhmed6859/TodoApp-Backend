@@ -31,12 +31,9 @@ export const getMyLists = catchAsync(async (req, res, next) => {
 
 export const createMyList = catchAsync(async (req, res, next) => {
   const userId = req.userId as number;
-  const result = createListSchema.safeParse(req.body);
-  if (!result.success) {
-    return zodBadRequest(res, result);
-  }
+  const data = createListSchema.parse(req.body);
 
-  const newList = await createTodoListForUser(userId, result.data);
+  const newList = await createTodoListForUser(userId, data);
   if (!newList) {
     return conflict(res, "List could not be created");
   }
@@ -45,23 +42,10 @@ export const createMyList = catchAsync(async (req, res, next) => {
 
 export const updateMyList = catchAsync(async (req, res, next) => {
   const userId = req.userId as number;
+  const { id: listId } = idParams.parse(req.params);
+  const data = updateListSchema.parse(req.body);
 
-  const paramsResult = idParams.safeParse(req.params);
-  if (!paramsResult.success) {
-    return zodBadRequest(res, paramsResult);
-  }
-
-  const bodyResult = updateListSchema.safeParse(req.body);
-  if (!bodyResult.success) {
-    return zodBadRequest(res, bodyResult);
-  }
-  const { id: listId } = paramsResult.data;
-
-  const updatedList = await updateTodoListForUser(
-    userId,
-    listId,
-    bodyResult.data
-  );
+  const updatedList = await updateTodoListForUser(userId, listId, data);
 
   if (!updatedList) {
     return notFound(res, { message: "List not found" });

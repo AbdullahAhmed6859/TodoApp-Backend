@@ -1,7 +1,7 @@
 // middleware/errorHandler.ts
 import { Request, Response, NextFunction } from "express";
 import { ZodError } from "zod";
-import { sendResponse, serverError } from "../utils/sendResponse";
+import { serverError, zodErrorBadRequest } from "../utils/sendResponse";
 
 export class HttpError extends Error {
   statusCode: number;
@@ -21,15 +21,12 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
+  //   Handle Zod validation errors
+  if (err instanceof ZodError) {
+    return zodErrorBadRequest(res, err);
+  }
   console.error(err);
   return serverError(res);
-  // Handle Zod validation errors
-  //   if (err instanceof ZodError) {
-  //     return sendResponse(res, 400, {
-  //       message: "Validation error",
-  //       errors: err.flatten().fieldErrors,
-  //     });
-  //   }
 
   //   // Handle known HttpErrors
   //   if (err instanceof HttpError) {
@@ -51,3 +48,13 @@ export const errorHandler = (
   //     message: "Unknown error occurred",
   //   });
 };
+
+//   if (!result) {
+//     const fieldErrors = result.error.flatten().fieldErrors;
+
+//     if (fieldErrors.email?.includes("Email already in use")) {
+//       return duplicate(res, {
+//         errors: { email: ["Email already in use"] },
+//         message: "User with this email alread exists",
+//       });
+//     }

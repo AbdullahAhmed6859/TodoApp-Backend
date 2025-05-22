@@ -1,6 +1,6 @@
 // utils/sendResponse.ts
 import { Response } from "express";
-import { SafeParseError, SafeParseReturnType } from "zod";
+import { SafeParseError, SafeParseReturnType, ZodError } from "zod";
 
 type Data = { [key: string]: any } | null;
 type Errors = object | null;
@@ -91,8 +91,19 @@ export const zodBadRequest = (
   res: Response,
   zodResult: SafeParseError<any>
 ) => {
-  badRequest(res, { errors: zodResult.error.flatten().fieldErrors });
+  badRequest(res, {
+    message: "validation error",
+    errors: zodResult.error.flatten().fieldErrors,
+  });
 };
+
+export const zodErrorBadRequest = (res: Response, zodResult: ZodError) => {
+  badRequest(res, {
+    message: "validation error",
+    errors: zodResult.flatten().fieldErrors,
+  });
+};
+
 function mergeDefaultMessage(
   options: ResponseOptions = {},
   defaultOptions: ResponseOptions = {}
