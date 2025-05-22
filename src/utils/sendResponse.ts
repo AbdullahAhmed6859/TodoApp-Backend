@@ -84,6 +84,9 @@ export const notFound = (res: Response, options: ErrorsMessage = {}) =>
 
 export const deleted = (res: Response) => sendResponse(res, 204);
 
+export const conflict = (res: Response, message?: Message) =>
+  sendResponse(res, 409, { message });
+
 export const zodBadRequest = (
   res: Response,
   zodResult: SafeParseError<any>

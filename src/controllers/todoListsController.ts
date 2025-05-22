@@ -6,6 +6,7 @@ import {
 } from "../models/todoListsModel";
 import { ExpressHandlerAsync } from "../types/expressHandlers";
 import {
+  conflict,
   created,
   deleted,
   notFound,
@@ -42,6 +43,9 @@ export const createMyList: ExpressHandlerAsync = async (req, res) => {
   }
   try {
     const newList = await createTodoListForUser(userId, result.data);
+    if (!newList) {
+      return conflict(res, "List could not be created");
+    }
     return created(res, { data: { newList }, message: "TodoList created" });
   } catch (err) {
     console.error(err);
@@ -67,6 +71,10 @@ export const updateMyList: ExpressHandlerAsync = async (req, res) => {
     paramsResult.data.listId,
     bodyResult.data
   );
+
+  if (!updatedList) {
+    return notFound(res, { message: "List not found" });
+  }
 
   return ok(res, {
     data: {
