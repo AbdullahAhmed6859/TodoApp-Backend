@@ -1,10 +1,9 @@
-import { loginSchema, signupSchema } from "../zodSchemas/userSchemas";
+import { loginSchema, signupSchema } from "../zod-schemas/userSchemas";
 import { createUser, findUserByEmail } from "../models/userModel";
 import { generateToken } from "../utils/jwt";
 import { ExpressHandler, ExpressHandlerAsync } from "../types/expressHandlers";
 import { compare } from "bcrypt";
 import {
-  badRequest,
   created,
   duplicate,
   ok,

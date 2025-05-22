@@ -14,11 +14,11 @@ import {
   serverError,
   zodBadRequest,
 } from "../utils/sendResponse";
-import { idParams } from "../zodSchemas/common";
+import { idParams } from "../zod-schemas/common";
 import {
   createListSchema,
   updateListSchema,
-} from "../zodSchemas/todoListSchemas";
+} from "../zod-schemas/todoListSchemas";
 
 export const getMyLists: ExpressHandlerAsync = async (req, res) => {
   const userId = req.userId as number;

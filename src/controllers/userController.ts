@@ -10,8 +10,8 @@ import {
   serverError,
   zodBadRequest,
 } from "../utils/sendResponse";
-import { idParams } from "../zodSchemas/common";
-import { patchUserSchema, putUserSchema } from "../zodSchemas/userSchemas";
+import { idParams } from "../zod-schemas/common";
+import { patchUserSchema, putUserSchema } from "../zod-schemas/userSchemas";
 
 export const getMyId: ExpressHandlerAsync = async (req, res, next) => {
   req.params.id = String(req.userId);

@@ -15,14 +15,13 @@ import {
   serverError,
   zodBadRequest,
 } from "../utils/sendResponse";
-import { idParams } from "../zodSchemas/common";
-import { listIdParams } from "../zodSchemas/todoListSchemas";
+import { listIdParams } from "../zod-schemas/todoListSchemas";
 import {
   createTodoSchema,
   patchUpdateTodoSchema,
   putUpdateTodoSchema,
   todoIdParams,
-} from "../zodSchemas/todoSchema";
+} from "../zod-schemas/todoSchema";
 
 export const getMyTodos: ExpressHandlerAsync = async (req, res) => {
   const userId = req.userId as number;

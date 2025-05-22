@@ -3,7 +3,7 @@ import {
   createTodoSchema,
   patchUpdateTodoSchema,
   putUpdateTodoSchema,
-} from "../zodSchemas/todoSchema";
+} from "../zod-schemas/todoSchema";
 import { pool } from "../db/pool";
 import { todoListBelongsToUser } from "./todoListsModel";
 import { toCamelCase } from "../utils/toCamelCase";

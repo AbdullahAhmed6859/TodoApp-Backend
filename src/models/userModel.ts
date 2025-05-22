@@ -5,7 +5,7 @@ import {
   patchUserSchema,
   putUserSchema,
   signupSchema,
-} from "../zodSchemas/userSchemas";
+} from "../zod-schemas/userSchemas";
 import { toCamelCase } from "../utils/toCamelCase";
 import { generateSetQuery } from "../db/generateSetQuery";
 
