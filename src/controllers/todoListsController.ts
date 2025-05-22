@@ -4,14 +4,13 @@ import {
   deleteTodoListForUser,
   updateTodoListForUser,
 } from "../models/todoListsModel";
-import { ExpressHandlerAsync } from "../types/expressHandlers";
+import { catchAsync } from "../utils/catchAsync";
 import {
   conflict,
   created,
   deleted,
   notFound,
   ok,
-  serverError,
   zodBadRequest,
 } from "../utils/sendResponse";
 import { idParams } from "../zod-schemas/common";
@@ -20,39 +19,31 @@ import {
   updateListSchema,
 } from "../zod-schemas/todoListSchemas";
 
-export const getMyLists: ExpressHandlerAsync = async (req, res) => {
+export const getMyLists = catchAsync(async (req, res, next) => {
   const userId = req.userId as number;
-  try {
-    const todoLists = await getTodoListsForUser(userId);
-    return ok(res, {
-      data: { todoLists },
-      message: "Let's Create Your First Todo List",
-    });
-  } catch (err) {
-    console.error(err);
-    return serverError(res);
-  }
-};
 
-export const createMyList: ExpressHandlerAsync = async (req, res) => {
+  const todoLists = await getTodoListsForUser(userId);
+  return ok(res, {
+    data: { todoLists },
+    message: "Let's Create Your First Todo List",
+  });
+});
+
+export const createMyList = catchAsync(async (req, res, next) => {
   const userId = req.userId as number;
   const result = createListSchema.safeParse(req.body);
   if (!result.success) {
     return zodBadRequest(res, result);
   }
-  try {
-    const newList = await createTodoListForUser(userId, result.data);
-    if (!newList) {
-      return conflict(res, "List could not be created");
-    }
-    return created(res, { data: { newList }, message: "TodoList created" });
-  } catch (err) {
-    console.error(err);
-    return serverError(res);
-  }
-};
 
-export const updateMyList: ExpressHandlerAsync = async (req, res) => {
+  const newList = await createTodoListForUser(userId, result.data);
+  if (!newList) {
+    return conflict(res, "List could not be created");
+  }
+  return created(res, { data: { newList }, message: "TodoList created" });
+});
+
+export const updateMyList = catchAsync(async (req, res, next) => {
   const userId = req.userId as number;
 
   const paramsResult = idParams.safeParse(req.params);
@@ -81,9 +72,9 @@ export const updateMyList: ExpressHandlerAsync = async (req, res) => {
       updatedList,
     },
   });
-};
+});
 
-export const deleteMyList: ExpressHandlerAsync = async (req, res) => {
+export const deleteMyList = catchAsync(async (req, res, next) => {
   const userId = req.userId as number;
   const result = idParams.safeParse(req.params);
 
@@ -92,15 +83,10 @@ export const deleteMyList: ExpressHandlerAsync = async (req, res) => {
   }
   const { id: listId } = result.data;
 
-  try {
-    const deletedList = await deleteTodoListForUser(userId, listId);
-    if (!deletedList) {
-      return notFound(res, { message: "List not found" });
-    }
-
-    return deleted(res);
-  } catch (err) {
-    console.error(err);
-    serverError(res);
+  const deletedList = await deleteTodoListForUser(userId, listId);
+  if (!deletedList) {
+    return notFound(res, { message: "List not found" });
   }
-};
+
+  return deleted(res);
+});

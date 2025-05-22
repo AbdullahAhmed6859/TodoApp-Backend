@@ -4,12 +4,8 @@ import {
   putUpdateUserById,
 } from "../models/userModel";
 import { ExpressHandlerAsync } from "../types/expressHandlers";
-import {
-  notFound,
-  ok,
-  serverError,
-  zodBadRequest,
-} from "../utils/sendResponse";
+import { catchAsync } from "../utils/catchAsync";
+import { notFound, ok, zodBadRequest } from "../utils/sendResponse";
 import { idParams } from "../zod-schemas/common";
 import { patchUserSchema, putUserSchema } from "../zod-schemas/userSchemas";
 
@@ -18,24 +14,19 @@ export const getMyId: ExpressHandlerAsync = async (req, res, next) => {
   next();
 };
 
-export const getUser: ExpressHandlerAsync = async (req, res) => {
+export const getUser = catchAsync(async (req, res, next) => {
   const result = idParams.safeParse(req.params);
   if (!result.success) return zodBadRequest(res, result);
 
-  try {
-    const user = await findUserById(result.data.id);
-    if (!user) {
-      return notFound(res, { message: "User does not exist" });
-    }
-
-    return ok(res, { data: { user } });
-  } catch (err) {
-    console.error(err);
-    return serverError(res);
+  const user = await findUserById(result.data.id);
+  if (!user) {
+    return notFound(res, { message: "User does not exist" });
   }
-};
 
-export const putUpdateUser: ExpressHandlerAsync = async (req, res) => {
+  return ok(res, { data: { user } });
+});
+
+export const putUpdateUser = catchAsync(async (req, res, next) => {
   const paramsResult = idParams.safeParse(req.params);
   if (!paramsResult.success) {
     return zodBadRequest(res, paramsResult);
@@ -46,25 +37,20 @@ export const putUpdateUser: ExpressHandlerAsync = async (req, res) => {
     return zodBadRequest(res, bodyResult);
   }
 
-  try {
-    const updatedUser = await putUpdateUserById(
-      paramsResult.data.id,
-      bodyResult.data
-    );
+  const updatedUser = await putUpdateUserById(
+    paramsResult.data.id,
+    bodyResult.data
+  );
 
-    return ok(res, {
-      data: {
-        updatedUser,
-      },
-      message: "User has been updated",
-    });
-  } catch (err) {
-    console.error(err);
-    return serverError(res);
-  }
-};
+  return ok(res, {
+    data: {
+      updatedUser,
+    },
+    message: "User has been updated",
+  });
+});
 
-export const patchUpdateUser: ExpressHandlerAsync = async (req, res) => {
+export const patchUpdateUser = catchAsync(async (req, res, next) => {
   const paramsResult = idParams.safeParse(req.params);
   if (!paramsResult.success) {
     return zodBadRequest(res, paramsResult);
@@ -75,20 +61,15 @@ export const patchUpdateUser: ExpressHandlerAsync = async (req, res) => {
     return zodBadRequest(res, bodyResult);
   }
 
-  try {
-    const updatedUser = await patchUpdateUserById(
-      paramsResult.data.id,
-      bodyResult.data
-    );
+  const updatedUser = await patchUpdateUserById(
+    paramsResult.data.id,
+    bodyResult.data
+  );
 
-    return ok(res, {
-      data: {
-        updatedUser,
-      },
-      message: "User has been updated",
-    });
-  } catch (err) {
-    console.error(err);
-    return serverError(res);
-  }
-};
+  return ok(res, {
+    data: {
+      updatedUser,
+    },
+    message: "User has been updated",
+  });
+});

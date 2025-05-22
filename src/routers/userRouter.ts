@@ -15,5 +15,4 @@ router
   .get(getUser)
   .put(putUpdateUser)
   .patch(patchUpdateUser);
-// .delete()
 export { router as userRouter };

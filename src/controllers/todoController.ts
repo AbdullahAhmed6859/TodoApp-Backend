@@ -5,14 +5,13 @@ import {
   patchUpdateTodoOfAList,
   putUpdateTodoOfAList,
 } from "../models/todoModel";
-import { ExpressHandlerAsync } from "../types/expressHandlers";
+import { catchAsync } from "../utils/catchAsync";
 import {
   conflict,
   created,
   deleted,
   notFound,
   ok,
-  serverError,
   zodBadRequest,
 } from "../utils/sendResponse";
 import { listIdParams } from "../zod-schemas/todoListSchemas";
@@ -23,7 +22,7 @@ import {
   todoIdParams,
 } from "../zod-schemas/todoSchema";
 
-export const getMyTodos: ExpressHandlerAsync = async (req, res) => {
+export const getMyTodos = catchAsync(async (req, res, next) => {
   const userId = req.userId as number;
 
   const resultParams = listIdParams.safeParse(req.params);
@@ -33,20 +32,15 @@ export const getMyTodos: ExpressHandlerAsync = async (req, res) => {
 
   const { listId } = resultParams.data;
 
-  try {
-    const todos = await getTodosOfAList(userId, listId);
-    return ok(res, {
-      data: {
-        todos,
-      },
-    });
-  } catch (err) {
-    console.error(err);
-    serverError(res);
-  }
-};
+  const todos = await getTodosOfAList(userId, listId);
+  return ok(res, {
+    data: {
+      todos,
+    },
+  });
+});
 
-export const createMyTodo: ExpressHandlerAsync = async (req, res) => {
+export const createMyTodo = catchAsync(async (req, res, next) => {
   const userId = req.userId as number;
 
   const resultParams = listIdParams.safeParse(req.params);
@@ -60,25 +54,20 @@ export const createMyTodo: ExpressHandlerAsync = async (req, res) => {
   }
 
   const { listId } = resultParams.data;
-  try {
-    const newTodo = await createTodoForAList(userId, listId, resultBody.data);
+  const newTodo = await createTodoForAList(userId, listId, resultBody.data);
 
-    if (!newTodo) {
-      return conflict(res, "Todo Could not be created");
-    }
-
-    return created(res, {
-      data: {
-        newTodo,
-      },
-    });
-  } catch (err) {
-    console.error(err);
-    serverError(res);
+  if (!newTodo) {
+    return conflict(res, "Todo Could not be created");
   }
-};
 
-export const putUpdateMyTodo: ExpressHandlerAsync = async (req, res) => {
+  return created(res, {
+    data: {
+      newTodo,
+    },
+  });
+});
+
+export const putUpdateMyTodo = catchAsync(async (req, res, next) => {
   const userId = req.userId as number;
 
   const resultParams = todoIdParams.safeParse(req.params);
@@ -92,29 +81,24 @@ export const putUpdateMyTodo: ExpressHandlerAsync = async (req, res) => {
   }
 
   const { listId, todoId } = resultParams.data;
-  try {
-    const updatedTodo = await putUpdateTodoOfAList(
-      userId,
-      listId,
-      todoId,
-      resultBody.data
-    );
-    if (!updatedTodo) {
-      return notFound(res);
-    }
-
-    return ok(res, {
-      data: {
-        updatedTodo,
-      },
-    });
-  } catch (err) {
-    console.error(err);
-    serverError(res);
+  const updatedTodo = await putUpdateTodoOfAList(
+    userId,
+    listId,
+    todoId,
+    resultBody.data
+  );
+  if (!updatedTodo) {
+    return notFound(res);
   }
-};
 
-export const patchUpdateMyTodo: ExpressHandlerAsync = async (req, res) => {
+  return ok(res, {
+    data: {
+      updatedTodo,
+    },
+  });
+});
+
+export const patchUpdateMyTodo = catchAsync(async (req, res, next) => {
   const userId = req.userId as number;
 
   const resultParams = todoIdParams.safeParse(req.params);
@@ -128,29 +112,25 @@ export const patchUpdateMyTodo: ExpressHandlerAsync = async (req, res) => {
   }
 
   const { listId, todoId } = resultParams.data;
-  try {
-    const updatedTodo = await patchUpdateTodoOfAList(
-      userId,
-      listId,
-      todoId,
-      resultBody.data
-    );
-    if (!updatedTodo) {
-      return notFound(res);
-    }
 
-    return ok(res, {
-      data: {
-        updatedTodo,
-      },
-    });
-  } catch (err) {
-    console.error(err);
-    serverError(res);
+  const updatedTodo = await patchUpdateTodoOfAList(
+    userId,
+    listId,
+    todoId,
+    resultBody.data
+  );
+  if (!updatedTodo) {
+    return notFound(res);
   }
-};
 
-export const deleteMyTodo: ExpressHandlerAsync = async (req, res) => {
+  return ok(res, {
+    data: {
+      updatedTodo,
+    },
+  });
+});
+
+export const deleteMyTodo = catchAsync(async (req, res, next) => {
   const userId = req.userId as number;
   const resultParams = todoIdParams.safeParse(req.params);
 
@@ -159,15 +139,11 @@ export const deleteMyTodo: ExpressHandlerAsync = async (req, res) => {
   }
 
   const { listId, todoId } = resultParams.data;
-  try {
-    const deletedTodo = await deleteTodoOfAList(userId, listId, todoId);
-    if (!deletedTodo) {
-      return notFound(res, { message: "Todo not found" });
-    }
 
-    return deleted(res);
-  } catch (err) {
-    console.error(err);
-    serverError(res);
+  const deletedTodo = await deleteTodoOfAList(userId, listId, todoId);
+  if (!deletedTodo) {
+    return notFound(res, { message: "Todo not found" });
   }
-};
+
+  return deleted(res);
+});
