@@ -1,5 +1,20 @@
+import {
+  createTodoForAList,
+  deleteTodoOfAList,
+  getTodosOfAList,
+  patchUpdateTodoOfAList,
+  putUpdateTodoOfAList,
+} from "../models/todoModel";
 import { ExpressHandlerAsync } from "../types/expressHandlers";
-import { ok, serverError, zodBadRequest } from "../utils/sendResponse";
+import {
+  conflict,
+  created,
+  deleted,
+  notFound,
+  ok,
+  serverError,
+  zodBadRequest,
+} from "../utils/sendResponse";
 import { listIdParams } from "../zodSchemas/todoListSchemas";
 import {
   createTodoSchema,
@@ -19,10 +34,10 @@ export const getMyTodos: ExpressHandlerAsync = async (req, res) => {
   const { listId } = resultParams.data;
 
   try {
+    const todos = await getTodosOfAList(userId, listId);
     return ok(res, {
       data: {
-        userId,
-        listId,
+        todos,
       },
     });
   } catch (err) {
@@ -46,10 +61,15 @@ export const createMyTodo: ExpressHandlerAsync = async (req, res) => {
 
   const { listId } = resultParams.data;
   try {
-    return ok(res, {
+    const newTodo = await createTodoForAList(userId, listId, resultBody.data);
+
+    if (!newTodo) {
+      return conflict(res, "Todo Could not be created");
+    }
+
+    return created(res, {
       data: {
-        userId,
-        listId,
+        newTodo,
       },
     });
   } catch (err) {
@@ -73,11 +93,19 @@ export const putUpdateMyTodo: ExpressHandlerAsync = async (req, res) => {
 
   const { listId, todoId } = resultParams.data;
   try {
+    const updatedTodo = await putUpdateTodoOfAList(
+      userId,
+      listId,
+      todoId,
+      resultBody.data
+    );
+    if (!updatedTodo) {
+      return notFound(res);
+    }
+
     return ok(res, {
       data: {
-        userId,
-        listId,
-        todoId,
+        updatedTodo,
       },
     });
   } catch (err) {
@@ -101,11 +129,19 @@ export const patchUpdateMyTodo: ExpressHandlerAsync = async (req, res) => {
 
   const { listId, todoId } = resultParams.data;
   try {
+    const updatedTodo = await patchUpdateTodoOfAList(
+      userId,
+      listId,
+      todoId,
+      resultBody.data
+    );
+    if (!updatedTodo) {
+      return notFound(res);
+    }
+
     return ok(res, {
       data: {
-        userId,
-        listId,
-        todoId,
+        updatedTodo,
       },
     });
   } catch (err) {
@@ -124,13 +160,12 @@ export const deleteMyTodo: ExpressHandlerAsync = async (req, res) => {
 
   const { listId, todoId } = resultParams.data;
   try {
-    return ok(res, {
-      data: {
-        userId,
-        listId,
-        todoId,
-      },
-    });
+    const deletedTodo = await deleteTodoOfAList(userId, listId, todoId);
+    if (!deletedTodo) {
+      return notFound(res, { message: "Todo not found" });
+    }
+
+    return deleted(res);
   } catch (err) {
     console.error(err);
     serverError(res);
