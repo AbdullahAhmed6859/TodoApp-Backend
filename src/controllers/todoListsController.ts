@@ -24,7 +24,10 @@ export const getMyLists: ExpressHandlerAsync = async (req, res) => {
   const userId = req.userId as number;
   try {
     const todoLists = await getTodoListsForUser(userId);
-    ok(res, { data: { todoLists } });
+    return ok(res, {
+      data: { todoLists },
+      message: "Let's Create Your First Todo List",
+    });
   } catch (err) {
     console.error(err);
     return serverError(res);
@@ -39,7 +42,7 @@ export const createMyList: ExpressHandlerAsync = async (req, res) => {
   }
   try {
     const newList = await createTodoListForUser(userId, result.data);
-    created(res, { data: { newList }, message: "TodoList created" });
+    return created(res, { data: { newList }, message: "TodoList created" });
   } catch (err) {
     console.error(err);
     return serverError(res);
