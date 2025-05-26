@@ -13,9 +13,6 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  // Log error for debugging (consider a better logging solution in production)
-  console.error(err);
-
   // Handle Zod validation errors
   if (err instanceof ZodError) {
     return zodErrorBadRequest(res, err);
@@ -61,6 +58,7 @@ export const errorHandler = (
     }
   }
 
+  console.error(err);
   // Handle generic errors
   if (err instanceof Error) {
     return sendResponse(res, 500, {

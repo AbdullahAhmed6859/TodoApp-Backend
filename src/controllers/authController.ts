@@ -29,7 +29,7 @@ export const logIn = catchAsync(async (req, res, next) => {
   if (!user || !(await compare(password, user.password))) {
     AppError.unauthorized("Invalid email or password");
   }
-
+  delete user.password;
   const token = generateToken(user.id);
 
   return ok(res, {

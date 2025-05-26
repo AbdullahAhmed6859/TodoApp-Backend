@@ -5,7 +5,6 @@ import {
   putUpdateTodoSchema,
 } from "../zod-schemas/todoSchema";
 import { pool } from "../db/pool";
-import { todoListBelongsToUser } from "./todoListsModel";
 import { generateSetQuery } from "../db/generateSetQuery";
 
 export const getTodosOfAList = async (userId: number, listId: number) => {

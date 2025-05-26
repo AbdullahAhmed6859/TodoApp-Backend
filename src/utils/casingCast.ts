@@ -11,6 +11,10 @@ export const objToCamelCase = <T extends Record<string, any>>(
     return obj;
   }
 
+  if (obj instanceof Date) {
+    return obj;
+  }
+
   if (Array.isArray(obj)) {
     return obj.map((item) => objToCamelCase(item));
   }

@@ -18,15 +18,13 @@ export async function createUser(userDetails: z.infer<typeof signupSchema>) {
     RETURNING id, first_name, last_name, email;`,
     [firstName, lastName, email, hashedPassword]
   );
-  console.log(result.rows[0]);
   return result.rows[0];
 }
 
 export async function findUserByEmail(email: string) {
-  const result = await pool.query(
-    `SELECT id, first_name, last_name, email FROM users WHERE email = $1`,
-    [email]
-  );
+  const result = await pool.query(`SELECT * FROM users WHERE email = $1`, [
+    email,
+  ]);
   return result.rows[0];
 }
 

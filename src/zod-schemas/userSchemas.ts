@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { findUserByEmail } from "../models/userModel";
 import { id, patchRefine } from "./common";
 
 const createNameSchema = (prefix: string) =>
