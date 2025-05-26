@@ -9,7 +9,7 @@ import { AppError } from "../utils/AppError";
 import { createUserService } from "../services/userServices";
 
 export const signUp = catchAsync(async (req, res, next) => {
-  const data = await signupSchema.parseAsync(req.body);
+  const data = signupSchema.parse(req.body);
   const newUser = await createUserService(data);
   const token = generateToken(newUser.id);
 
@@ -34,12 +34,7 @@ export const logIn = catchAsync(async (req, res, next) => {
 
   return ok(res, {
     data: {
-      user: {
-        id: user.id,
-        firstName: user.first_name,
-        lastName: user.last_name,
-        email: user.email,
-      },
+      user,
       token,
     },
     message: "User Logged In",
