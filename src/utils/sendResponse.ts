@@ -1,6 +1,5 @@
-// utils/sendResponse.ts
 import { Response } from "express";
-import { SafeParseError, SafeParseReturnType, ZodError } from "zod";
+import { ZodError } from "zod";
 import { objToCamelCase } from "./casingCast";
 
 type Data = { [key: string]: any } | null;
@@ -9,11 +8,6 @@ type Message = string | null;
 
 type ResponseOptions = {
   data?: Data;
-  errors?: Errors;
-  message?: Message;
-};
-
-type ErrorsMessage = {
   errors?: Errors;
   message?: Message;
 };
@@ -68,8 +62,8 @@ export const zodErrorBadRequest = (res: Response, err: ZodError) => {
   });
 };
 
-export const serverError = (res: Response) =>
-  sendResponse(res, 500, { message: "Unknown error Occured" });
+export const serverError = (res: Response, message = "Unknown error Occured") =>
+  sendResponse(res, 500, { message });
 
 function mergeDefaultMessage(
   options: ResponseOptions = {},

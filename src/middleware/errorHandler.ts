@@ -6,6 +6,7 @@ import {
   zodErrorBadRequest,
 } from "../utils/sendResponse";
 import { AppError } from "../utils/AppError";
+import { ENV } from "../config";
 
 export const errorHandler = (
   err: unknown,
@@ -61,12 +62,10 @@ export const errorHandler = (
   console.error(err);
   // Handle generic errors
   if (err instanceof Error) {
-    return sendResponse(res, 500, {
-      message:
-        process.env.NODE_ENV === "production"
-          ? "Internal server error"
-          : err.message,
-    });
+    return serverError(
+      res,
+      ENV === "production" ? "Internal server error" : err.message
+    );
   }
 
   // Catch-all fallback
