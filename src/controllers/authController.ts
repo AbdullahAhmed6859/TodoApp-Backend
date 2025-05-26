@@ -1,84 +1,50 @@
 import { loginSchema, signupSchema } from "../zod-schemas/userSchemas";
-import { createUser, findUserByEmail } from "../models/userModel";
+import { findUserByEmail } from "../models/userModel";
 import { generateToken } from "../utils/jwt";
-import { ExpressHandler, ExpressHandlerAsync } from "../types/expressHandlers";
+import { ExpressHandler } from "../types/expressHandlers";
 import { compare } from "bcrypt";
-import {
-  created,
-  duplicate,
-  ok,
-  serverError,
-  unauthorized,
-  zodBadRequest,
-} from "../utils/sendResponse";
+import { created, ok } from "../utils/sendResponse";
+import { catchAsync } from "../utils/catchAsync";
+import { AppError } from "../utils/AppError";
+import { createUserService } from "../services/userServices";
 
-export const signUp: ExpressHandlerAsync = async (req, res) => {
-  const result = await signupSchema.safeParseAsync(req.body);
+export const signUp = catchAsync(async (req, res, next) => {
+  const data = await signupSchema.parseAsync(req.body);
+  const newUser = await createUserService(data);
+  const token = generateToken(newUser.id);
 
-  if (!result.success) {
-    const fieldErrors = result.error.flatten().fieldErrors;
+  return created(res, {
+    data: {
+      user: newUser,
+      token,
+    },
+    message: "SignUp complete",
+  });
+});
 
-    if (fieldErrors.email?.includes("Email already in use")) {
-      return duplicate(res, {
-        errors: { email: ["Email already in use"] },
-        message: "User with this email alread exists",
-      });
-    }
+export const logIn = catchAsync(async (req, res, next) => {
+  const { email, password } = loginSchema.parse(req.body);
 
-    return zodBadRequest(res, result);
+  const user = await findUserByEmail(email);
+  if (!user || !(await compare(password, user.password))) {
+    AppError.unauthorized("Invalid email or password");
   }
 
-  try {
-    const newUser = await createUser(result.data);
+  const token = generateToken(user.id);
 
-    const token = generateToken(newUser.id);
-
-    return created(res, {
-      data: {
-        user: newUser,
-        token,
+  return ok(res, {
+    data: {
+      user: {
+        id: user.id,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        email: user.email,
       },
-      message: "SignUp complete",
-    });
-  } catch (err) {
-    console.error(err);
-    return serverError(res);
-  }
-};
-
-export const logIn: ExpressHandlerAsync = async (req, res) => {
-  const result = loginSchema.safeParse(req.body);
-
-  if (!result.success) {
-    return zodBadRequest(res, result);
-  }
-
-  const { email, password } = result.data;
-
-  try {
-    const user = await findUserByEmail(email);
-    if (!user || !(await compare(password, user.password))) {
-      return unauthorized(res, { message: "Invalid email or password" });
-    }
-
-    const token = generateToken(user.id);
-    return ok(res, {
-      data: {
-        user: {
-          id: user.id,
-          firstName: user.first_name,
-          lastName: user.last_name,
-          email: user.email,
-        },
-        token,
-      },
-      message: "User Logged In",
-    });
-  } catch (err) {
-    console.error(err);
-    return serverError(res);
-  }
-};
+      token,
+    },
+    message: "User Logged In",
+  });
+});
 
 export const testProtect: ExpressHandler = (req, res) => {
   return ok(res, {

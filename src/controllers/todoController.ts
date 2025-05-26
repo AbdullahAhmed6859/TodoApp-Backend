@@ -1,3 +1,4 @@
+import { todoListBelongsToUser } from "../models/todoListsModel";
 import {
   createTodoForAList,
   deleteTodoOfAList,
@@ -5,16 +6,9 @@ import {
   patchUpdateTodoOfAList,
   putUpdateTodoOfAList,
 } from "../models/todoModel";
-import { ExpressHandlerAsync } from "../types/expressHandlers";
-import {
-  conflict,
-  created,
-  deleted,
-  notFound,
-  ok,
-  serverError,
-  zodBadRequest,
-} from "../utils/sendResponse";
+import { AppError } from "../utils/AppError";
+import { catchAsync } from "../utils/catchAsync";
+import { created, deleted, ok } from "../utils/sendResponse";
 import { listIdParams } from "../zod-schemas/todoListSchemas";
 import {
   createTodoSchema,
@@ -23,151 +17,92 @@ import {
   todoIdParams,
 } from "../zod-schemas/todoSchema";
 
-export const getMyTodos: ExpressHandlerAsync = async (req, res) => {
+export const getMyTodos = catchAsync(async (req, res, next) => {
   const userId = req.userId as number;
+  const { listId } = listIdParams.parse(req.params);
 
-  const resultParams = listIdParams.safeParse(req.params);
-  if (!resultParams.success) {
-    return zodBadRequest(res, resultParams);
+  if (await todoListBelongsToUser(userId, listId)) {
+    AppError.forbidden("You donot have permission to access this todo list");
   }
 
-  const { listId } = resultParams.data;
+  const todos = await getTodosOfAList(userId, listId);
 
-  try {
-    const todos = await getTodosOfAList(userId, listId);
-    return ok(res, {
-      data: {
-        todos,
-      },
-    });
-  } catch (err) {
-    console.error(err);
-    serverError(res);
-  }
-};
+  return ok(res, {
+    data: {
+      todos,
+    },
+  });
+});
 
-export const createMyTodo: ExpressHandlerAsync = async (req, res) => {
+export const createMyTodo = catchAsync(async (req, res, next) => {
   const userId = req.userId as number;
+  const { listId } = listIdParams.parse(req.params);
+  const data = createTodoSchema.parse(req.body);
 
-  const resultParams = listIdParams.safeParse(req.params);
-  if (!resultParams.success) {
-    return zodBadRequest(res, resultParams);
+  if (await todoListBelongsToUser(userId, listId)) {
+    AppError.forbidden("You donot have permission to access this todo list");
   }
 
-  const resultBody = createTodoSchema.safeParse(req.body);
-  if (!resultBody.success) {
-    return zodBadRequest(res, resultBody);
-  }
+  const newTodo = await createTodoForAList(userId, listId, data);
 
-  const { listId } = resultParams.data;
-  try {
-    const newTodo = await createTodoForAList(userId, listId, resultBody.data);
+  return created(res, {
+    data: {
+      newTodo,
+    },
+    message: "Todo has been created",
+  });
+});
 
-    if (!newTodo) {
-      return conflict(res, "Todo Could not be created");
-    }
-
-    return created(res, {
-      data: {
-        newTodo,
-      },
-    });
-  } catch (err) {
-    console.error(err);
-    serverError(res);
-  }
-};
-
-export const putUpdateMyTodo: ExpressHandlerAsync = async (req, res) => {
+export const putUpdateMyTodo = catchAsync(async (req, res, next) => {
   const userId = req.userId as number;
+  const { listId, todoId } = todoIdParams.parse(req.params);
+  const data = putUpdateTodoSchema.parse(req.body);
 
-  const resultParams = todoIdParams.safeParse(req.params);
-  if (!resultParams.success) {
-    return zodBadRequest(res, resultParams);
+  if (await todoListBelongsToUser(userId, listId)) {
+    AppError.forbidden("You donot have permission to access this todo list");
   }
 
-  const resultBody = putUpdateTodoSchema.safeParse(req.body);
-  if (!resultBody.success) {
-    return zodBadRequest(res, resultBody);
-  }
+  const updatedTodo = await putUpdateTodoOfAList(userId, listId, todoId, data);
 
-  const { listId, todoId } = resultParams.data;
-  try {
-    const updatedTodo = await putUpdateTodoOfAList(
-      userId,
-      listId,
-      todoId,
-      resultBody.data
-    );
-    if (!updatedTodo) {
-      return notFound(res);
-    }
+  return ok(res, {
+    data: {
+      updatedTodo,
+    },
+  });
+});
 
-    return ok(res, {
-      data: {
-        updatedTodo,
-      },
-    });
-  } catch (err) {
-    console.error(err);
-    serverError(res);
-  }
-};
-
-export const patchUpdateMyTodo: ExpressHandlerAsync = async (req, res) => {
+export const patchUpdateMyTodo = catchAsync(async (req, res, next) => {
   const userId = req.userId as number;
+  const { listId, todoId } = todoIdParams.parse(req.params);
+  const data = patchUpdateTodoSchema.parse(req.body);
 
-  const resultParams = todoIdParams.safeParse(req.params);
-  if (!resultParams.success) {
-    return zodBadRequest(res, resultParams);
+  if (await todoListBelongsToUser(userId, listId)) {
+    AppError.forbidden("You donot have permission to access this todo list");
   }
 
-  const resultBody = patchUpdateTodoSchema.safeParse(req.body);
-  if (!resultBody.success) {
-    return zodBadRequest(res, resultBody);
-  }
+  const updatedTodo = await patchUpdateTodoOfAList(
+    userId,
+    listId,
+    todoId,
+    data
+  );
 
-  const { listId, todoId } = resultParams.data;
-  try {
-    const updatedTodo = await patchUpdateTodoOfAList(
-      userId,
-      listId,
-      todoId,
-      resultBody.data
-    );
-    if (!updatedTodo) {
-      return notFound(res);
-    }
+  return ok(res, {
+    data: {
+      updatedTodo,
+    },
+  });
+});
 
-    return ok(res, {
-      data: {
-        updatedTodo,
-      },
-    });
-  } catch (err) {
-    console.error(err);
-    serverError(res);
-  }
-};
-
-export const deleteMyTodo: ExpressHandlerAsync = async (req, res) => {
+export const deleteMyTodo = catchAsync(async (req, res, next) => {
   const userId = req.userId as number;
-  const resultParams = todoIdParams.safeParse(req.params);
+  const { listId, todoId } = todoIdParams.parse(req.params);
 
-  if (!resultParams.success) {
-    return zodBadRequest(res, resultParams);
+  if (await todoListBelongsToUser(userId, listId)) {
+    AppError.forbidden("You donot have permission to access this todo list");
   }
 
-  const { listId, todoId } = resultParams.data;
-  try {
-    const deletedTodo = await deleteTodoOfAList(userId, listId, todoId);
-    if (!deletedTodo) {
-      return notFound(res, { message: "Todo not found" });
-    }
+  await deleteTodoOfAList(userId, listId, todoId);
 
-    return deleted(res);
-  } catch (err) {
-    console.error(err);
-    serverError(res);
-  }
-};
+  return deleted(res);
+});

@@ -12,26 +12,15 @@ const firstName = createNameSchema("first ");
 const lastName = createNameSchema("last ");
 const email = z.string().email();
 
-export const signupSchema = z
-  .object({
-    firstName,
-    lastName,
-    email,
-    password: z
-      .string()
-      .min(6, "Password must be at least 6 characters")
-      .max(32, "Password cannot be more than 32 characters"),
-  })
-  .superRefine(async (data, ctx) => {
-    const existingUser = await findUserByEmail(data.email);
-    if (existingUser) {
-      ctx.addIssue({
-        path: ["email"],
-        code: z.ZodIssueCode.custom,
-        message: "Email already in use",
-      });
-    }
-  });
+export const signupSchema = z.object({
+  firstName,
+  lastName,
+  email,
+  password: z
+    .string()
+    .min(6, "Password must be at least 6 characters")
+    .max(32, "Password cannot be more than 32 characters"),
+});
 
 export const loginSchema = z.object({
   email,

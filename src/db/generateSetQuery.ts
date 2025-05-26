@@ -1,4 +1,4 @@
-import { toCamelCase } from "../utils/toCamelCase";
+import { toSnakeCase } from "../utils/casingCast";
 
 export const generateSetQuery = (options: object) => {
   const updates: string[] = [];
@@ -7,7 +7,7 @@ export const generateSetQuery = (options: object) => {
 
   for (const [key, value] of Object.entries(options)) {
     if (value !== undefined) {
-      const dbColumnName = toCamelCase(key);
+      const dbColumnName = toSnakeCase(key);
       updates.push(`${dbColumnName} = $${paramCounter++}`);
       values.push(value);
     }

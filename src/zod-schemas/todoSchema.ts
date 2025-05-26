@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { id, patchRefine } from "./common";
-import { todoListBelongsToUser } from "../models/todoListsModel";
 
 const title = z
   .string()

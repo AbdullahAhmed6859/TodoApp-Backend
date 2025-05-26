@@ -1,6 +1,6 @@
 // utils/sendResponse.ts
 import { Response } from "express";
-import { SafeParseError, SafeParseReturnType } from "zod";
+import { SafeParseError, SafeParseReturnType, ZodError } from "zod";
 
 type Data = { [key: string]: any } | null;
 type Errors = object | null;
@@ -49,50 +49,27 @@ export const ok = (res: Response, options: DataMessage = {}) =>
   sendResponse(res, 200, options);
 
 export const created = (res: Response, options: DataMessage = {}) =>
-  sendResponse(res, 201, mergeDefaultMessage(options, { message: "created" }));
-
-export const badRequest = (res: Response, options: ErrorsMessage = {}) =>
-  sendResponse(
-    res,
-    400,
-    mergeDefaultMessage(options, { message: "Bad request" })
-  );
-
-export const serverError = (res: Response) =>
-  sendResponse(res, 500, { message: "Server error" });
-
-export const unauthorized = (res: Response, options: ErrorsMessage = {}) =>
-  sendResponse(
-    res,
-    401,
-    mergeDefaultMessage(options, { message: "Unauthorized" })
-  );
-
-export const duplicate = (res: Response, options: ErrorsMessage = {}) =>
-  sendResponse(
-    res,
-    409,
-    mergeDefaultMessage(options, { message: "Duplicate Entry" })
-  );
-
-export const notFound = (res: Response, options: ErrorsMessage = {}) =>
-  sendResponse(
-    res,
-    404,
-    mergeDefaultMessage(options, { message: "Resource not found" })
-  );
+  sendResponse(res, 201, options);
 
 export const deleted = (res: Response) => sendResponse(res, 204);
 
-export const conflict = (res: Response, message?: Message) =>
-  sendResponse(res, 409, { message });
-
-export const zodBadRequest = (
-  res: Response,
-  zodResult: SafeParseError<any>
-) => {
-  badRequest(res, { errors: zodResult.error.flatten().fieldErrors });
+export const zodErrorBadRequest = (res: Response, err: ZodError) => {
+  const formattedErrors: Record<string, string> = {};
+  err.errors.forEach((issue) => {
+    const field = issue.path[0];
+    if (typeof field === "string" && !formattedErrors[field]) {
+      formattedErrors[field] = issue.message;
+    }
+  });
+  sendResponse(res, 400, {
+    errors: formattedErrors,
+    message: "Validation Error",
+  });
 };
+
+export const serverError = (res: Response) =>
+  sendResponse(res, 500, { message: "Unknown error Occured" });
+
 function mergeDefaultMessage(
   options: ResponseOptions = {},
   defaultOptions: ResponseOptions = {}

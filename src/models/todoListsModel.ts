@@ -19,7 +19,7 @@ export const todoListBelongsToUser = async (userId: number, listId: number) => {
     [listId, userId]
   );
 
-  return (listCheck.rowCount ?? 0) === 1;
+  return (listCheck.rowCount ?? 0) === 0;
 };
 
 export async function createTodoListForUser(
@@ -49,13 +49,14 @@ export async function updateTodoListForUser(
     RETURNING id, title;`,
     [userId, listId, options.title]
   );
-  return result.rows;
+  return result.rows[0];
 }
 
 export async function deleteTodoListForUser(userId: number, listId: number) {
+  await todoListBelongsToUser(userId, listId);
+
   const result = await pool.query(
-    `DELETE FROM todo_lists WHERE id = $1 AND user_id = $2
-    RETURNING title;`,
+    `DELETE FROM todo_lists WHERE id = $1 AND user_id = $2`,
     [listId, userId]
   );
   return result.rows[0];

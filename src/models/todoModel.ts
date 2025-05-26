@@ -6,7 +6,6 @@ import {
 } from "../zod-schemas/todoSchema";
 import { pool } from "../db/pool";
 import { todoListBelongsToUser } from "./todoListsModel";
-import { toCamelCase } from "../utils/toCamelCase";
 import { generateSetQuery } from "../db/generateSetQuery";
 
 export const getTodosOfAList = async (userId: number, listId: number) => {
@@ -26,12 +25,6 @@ export const createTodoForAList = async (
   listId: number,
   options: z.infer<typeof createTodoSchema>
 ) => {
-  const ownsList = await todoListBelongsToUser(userId, listId);
-
-  if (!ownsList) {
-    return null;
-  }
-
   const { title, description } = options;
 
   const newTodo = await pool.query(
@@ -50,10 +43,6 @@ export const putUpdateTodoOfAList = async (
   todoId: number,
   options: z.infer<typeof putUpdateTodoSchema>
 ) => {
-  const blongsToUser = await todoListBelongsToUser(userId, listId);
-  if (!blongsToUser) {
-    return null;
-  }
   const { title, description, done } = options;
   const updatedTodo = await pool.query(
     `UPDATE todos 
@@ -71,11 +60,6 @@ export const patchUpdateTodoOfAList = async (
   todoId: number,
   options: z.infer<typeof patchUpdateTodoSchema>
 ) => {
-  const blongsToUser = await todoListBelongsToUser(userId, listId);
-  if (!blongsToUser) {
-    return null;
-  }
-
   const { updates, values, paramCounter } = generateSetQuery(options);
 
   values.push(todoId);
@@ -98,11 +82,6 @@ export const deleteTodoOfAList = async (
   listId: number,
   todoId: number
 ) => {
-  const blongsToUser = await todoListBelongsToUser(userId, listId);
-  if (!blongsToUser) {
-    return null;
-  }
-
   const result = await pool.query(
     `DELETE FROM todos 
     WHERE id = $1 AND list_id = $2
@@ -110,4 +89,19 @@ export const deleteTodoOfAList = async (
     [todoId, listId]
   );
   return result.rows[0];
+};
+
+export const todoBelongsToUser = async (
+  userId: number,
+  listId: number,
+  todoId: number
+) => {
+  const todoCheck = await pool.query(
+    `SELECT t.id FROM todos AS t
+    INNER JOIN todo_lists AS l ON t.list_id = l.id
+    WHERE t.id = $1 AND t.list_id = $2 AND l.user_id = $3`,
+    [todoId, listId, userId]
+  );
+
+  return (todoCheck.rowCount ?? 0) === 0;
 };
