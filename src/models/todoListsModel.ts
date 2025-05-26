@@ -4,6 +4,7 @@ import {
   createListSchema,
   updateListSchema,
 } from "../zod-schemas/todoListSchemas";
+import { AppError } from "../utils/AppError";
 
 export async function getTodoListsForUser(userId: number) {
   const result = await pool.query(
@@ -19,7 +20,12 @@ export const todoListBelongsToUser = async (userId: number, listId: number) => {
     [listId, userId]
   );
 
-  return (listCheck.rowCount ?? 0) === 1;
+  if ((listCheck.rowCount ?? 0) === 0) {
+    throw new AppError(
+      "Todo list not found or you don't have permission to access/update it",
+      404
+    );
+  }
 };
 
 export async function createTodoListForUser(
@@ -39,6 +45,8 @@ export async function updateTodoListForUser(
   listId: number,
   options: z.infer<typeof updateListSchema>
 ) {
+  await todoListBelongsToUser(userId, listId);
+
   const result = await pool.query(
     `UPDATE todo_lists
     SET title = $3,
@@ -49,13 +57,14 @@ export async function updateTodoListForUser(
     RETURNING id, title;`,
     [userId, listId, options.title]
   );
-  return result.rows;
+  return result.rows[0];
 }
 
 export async function deleteTodoListForUser(userId: number, listId: number) {
+  await todoListBelongsToUser(userId, listId);
+
   const result = await pool.query(
-    `DELETE FROM todo_lists WHERE id = $1 AND user_id = $2
-    RETURNING title;`,
+    `DELETE FROM todo_lists WHERE id = $1 AND user_id = $2`,
     [listId, userId]
   );
   return result.rows[0];

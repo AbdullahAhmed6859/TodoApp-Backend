@@ -6,7 +6,6 @@ import {
   putUserSchema,
   signupSchema,
 } from "../zod-schemas/userSchemas";
-import { toCamelCase } from "../utils/toCamelCase";
 import { generateSetQuery } from "../db/generateSetQuery";
 
 export async function createUser(userDetails: z.infer<typeof signupSchema>) {

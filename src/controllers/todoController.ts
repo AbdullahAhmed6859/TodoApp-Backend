@@ -1,3 +1,4 @@
+import { todoListBelongsToUser } from "../models/todoListsModel";
 import {
   createTodoForAList,
   deleteTodoOfAList,
@@ -6,13 +7,7 @@ import {
   putUpdateTodoOfAList,
 } from "../models/todoModel";
 import { catchAsync } from "../utils/catchAsync";
-import {
-  conflict,
-  created,
-  deleted,
-  notFound,
-  ok,
-} from "../utils/sendResponse";
+import { created, deleted, ok } from "../utils/sendResponse";
 import { listIdParams } from "../zod-schemas/todoListSchemas";
 import {
   createTodoSchema,
@@ -41,10 +36,6 @@ export const createMyTodo = catchAsync(async (req, res, next) => {
 
   const newTodo = await createTodoForAList(userId, listId, data);
 
-  if (!newTodo) {
-    return conflict(res, "Todo Could not be created");
-  }
-
   return created(res, {
     data: {
       newTodo,
@@ -54,14 +45,10 @@ export const createMyTodo = catchAsync(async (req, res, next) => {
 
 export const putUpdateMyTodo = catchAsync(async (req, res, next) => {
   const userId = req.userId as number;
-
   const { listId, todoId } = todoIdParams.parse(req.params);
   const data = putUpdateTodoSchema.parse(req.body);
 
   const updatedTodo = await putUpdateTodoOfAList(userId, listId, todoId, data);
-  if (!updatedTodo) {
-    return notFound(res);
-  }
 
   return ok(res, {
     data: {
@@ -82,10 +69,6 @@ export const patchUpdateMyTodo = catchAsync(async (req, res, next) => {
     data
   );
 
-  if (!updatedTodo) {
-    return notFound(res);
-  }
-
   return ok(res, {
     data: {
       updatedTodo,
@@ -97,10 +80,7 @@ export const deleteMyTodo = catchAsync(async (req, res, next) => {
   const userId = req.userId as number;
   const { listId, todoId } = todoIdParams.parse(req.params);
 
-  const deletedTodo = await deleteTodoOfAList(userId, listId, todoId);
-  if (!deletedTodo) {
-    return notFound(res, { message: "Todo not found" });
-  }
+  await deleteTodoOfAList(userId, listId, todoId);
 
   return deleted(res);
 });

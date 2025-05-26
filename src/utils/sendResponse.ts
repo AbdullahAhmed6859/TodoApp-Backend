@@ -59,7 +59,7 @@ export const badRequest = (res: Response, options: ErrorsMessage = {}) =>
   );
 
 export const serverError = (res: Response) =>
-  sendResponse(res, 500, { message: "Server error" });
+  sendResponse(res, 500, { message: "Unknown error Occured" });
 
 export const unauthorized = (res: Response, options: ErrorsMessage = {}) =>
   sendResponse(

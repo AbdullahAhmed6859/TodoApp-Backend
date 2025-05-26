@@ -5,14 +5,7 @@ import {
   updateTodoListForUser,
 } from "../models/todoListsModel";
 import { catchAsync } from "../utils/catchAsync";
-import {
-  conflict,
-  created,
-  deleted,
-  notFound,
-  ok,
-  zodBadRequest,
-} from "../utils/sendResponse";
+import { created, deleted, ok } from "../utils/sendResponse";
 import { idParams } from "../zod-schemas/common";
 import {
   createListSchema,
@@ -34,10 +27,11 @@ export const createMyList = catchAsync(async (req, res, next) => {
   const data = createListSchema.parse(req.body);
 
   const newList = await createTodoListForUser(userId, data);
-  if (!newList) {
-    return conflict(res, "List could not be created");
-  }
-  return created(res, { data: { newList }, message: "TodoList created" });
+
+  return created(res, {
+    data: { newList },
+    message: "TodoList created",
+  });
 });
 
 export const updateMyList = catchAsync(async (req, res, next) => {
@@ -46,10 +40,6 @@ export const updateMyList = catchAsync(async (req, res, next) => {
   const data = updateListSchema.parse(req.body);
 
   const updatedList = await updateTodoListForUser(userId, listId, data);
-
-  if (!updatedList) {
-    return notFound(res, { message: "List not found" });
-  }
 
   return ok(res, {
     data: {
@@ -60,17 +50,11 @@ export const updateMyList = catchAsync(async (req, res, next) => {
 
 export const deleteMyList = catchAsync(async (req, res, next) => {
   const userId = req.userId as number;
-  const result = idParams.safeParse(req.params);
+  const data = idParams.parse(req.params);
 
-  if (!result.success) {
-    return zodBadRequest(res, result);
-  }
-  const { id: listId } = result.data;
+  const { id: listId } = data;
 
-  const deletedList = await deleteTodoListForUser(userId, listId);
-  if (!deletedList) {
-    return notFound(res, { message: "List not found" });
-  }
+  await deleteTodoListForUser(userId, listId);
 
   return deleted(res);
 });
