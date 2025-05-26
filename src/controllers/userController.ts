@@ -4,9 +4,10 @@ import {
   putUpdateUserById,
 } from "../models/userModel";
 import { ExpressHandlerAsync } from "../types/expressHandlers";
+import { AppError } from "../utils/AppError";
 import { catchAsync } from "../utils/catchAsync";
-import { notFound, ok, zodBadRequest } from "../utils/sendResponse";
-import { id, idParams } from "../zod-schemas/common";
+import { ok } from "../utils/sendResponse";
+import { idParams } from "../zod-schemas/common";
 import { patchUserSchema, putUserSchema } from "../zod-schemas/userSchemas";
 
 export const getMyId: ExpressHandlerAsync = async (req, res, next) => {
@@ -20,7 +21,7 @@ export const getUser = catchAsync(async (req, res, next) => {
   const user = await findUserById(id);
 
   if (!user) {
-    return notFound(res, { message: "User does not exist" });
+    AppError.notFound("User not found");
   }
 
   return ok(res, { data: { user } });

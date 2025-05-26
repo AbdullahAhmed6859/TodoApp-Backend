@@ -1,14 +1,16 @@
 import { loginSchema, signupSchema } from "../zod-schemas/userSchemas";
-import { createUser, findUserByEmail } from "../models/userModel";
+import { findUserByEmail } from "../models/userModel";
 import { generateToken } from "../utils/jwt";
 import { ExpressHandler } from "../types/expressHandlers";
 import { compare } from "bcrypt";
-import { created, ok, unauthorized } from "../utils/sendResponse";
+import { created, ok } from "../utils/sendResponse";
 import { catchAsync } from "../utils/catchAsync";
+import { AppError } from "../utils/AppError";
+import { createUserService } from "../services/userServices";
 
 export const signUp = catchAsync(async (req, res, next) => {
   const data = await signupSchema.parseAsync(req.body);
-  const newUser = await createUser(data);
+  const newUser = await createUserService(data);
   const token = generateToken(newUser.id);
 
   return created(res, {
@@ -25,7 +27,7 @@ export const logIn = catchAsync(async (req, res, next) => {
 
   const user = await findUserByEmail(email);
   if (!user || !(await compare(password, user.password))) {
-    return unauthorized(res, { message: "Invalid email or password" });
+    AppError.unauthorized("Invalid email or password");
   }
 
   const token = generateToken(user.id);

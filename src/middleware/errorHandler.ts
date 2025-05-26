@@ -1,4 +1,3 @@
-// middleware/errorHandler.ts
 import { Request, Response, NextFunction } from "express";
 import { ZodError } from "zod";
 import {
@@ -14,7 +13,10 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  //   Handle Zod validation errors
+  // Log error for debugging (consider a better logging solution in production)
+  console.error(err);
+
+  // Handle Zod validation errors
   if (err instanceof ZodError) {
     return zodErrorBadRequest(res, err);
   }
@@ -27,10 +29,45 @@ export const errorHandler = (
     });
   }
 
+  // Handle PostgreSQL errors
+  if (typeof err === "object" && err !== null && "code" in err) {
+    const pgError = err as {
+      code: string;
+      detail?: string;
+      constraint?: string;
+    };
+
+    // Handle unique constraint violations
+    if (pgError.code === "23505") {
+      return sendResponse(res, 409, {
+        message: "Resource already exists",
+        errors: {
+          detail:
+            pgError.detail || "A resource with these details already exists",
+          constraint: pgError.constraint,
+        },
+      });
+    }
+
+    // Handle foreign key violations
+    if (pgError.code === "23503") {
+      return sendResponse(res, 400, {
+        message: "Invalid reference",
+        errors: {
+          detail: pgError.detail || "Referenced resource does not exist",
+          constraint: pgError.constraint,
+        },
+      });
+    }
+  }
+
   // Handle generic errors
   if (err instanceof Error) {
     return sendResponse(res, 500, {
-      message: err.message || "Internal server error",
+      message:
+        process.env.NODE_ENV === "production"
+          ? "Internal server error"
+          : err.message,
     });
   }
 

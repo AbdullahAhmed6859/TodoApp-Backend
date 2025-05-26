@@ -10,7 +10,6 @@ import { generateSetQuery } from "../db/generateSetQuery";
 
 export async function createUser(userDetails: z.infer<typeof signupSchema>) {
   const { firstName, lastName, email, password } = userDetails;
-
   const hashedPassword = await hash(password, 10);
 
   const result = await pool.query(
@@ -29,6 +28,9 @@ export async function findUserByEmail(email: string) {
   ]);
   return result.rows[0];
 }
+
+export const userWithEmailExists = async (email: string) =>
+  Boolean(await findUserByEmail(email));
 
 export async function findUserById(id: number) {
   const result = await pool.query(

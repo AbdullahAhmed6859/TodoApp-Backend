@@ -7,10 +7,8 @@ import {
 import { pool } from "../db/pool";
 import { todoListBelongsToUser } from "./todoListsModel";
 import { generateSetQuery } from "../db/generateSetQuery";
-import { AppError } from "../utils/AppError";
 
 export const getTodosOfAList = async (userId: number, listId: number) => {
-  await todoListBelongsToUser(userId, listId);
   const todos = await pool.query(
     `
     SELECT t.id, t.title, t.description, t.done FROM todos AS t
@@ -27,8 +25,6 @@ export const createTodoForAList = async (
   listId: number,
   options: z.infer<typeof createTodoSchema>
 ) => {
-  await todoListBelongsToUser(userId, listId);
-
   const { title, description } = options;
 
   const newTodo = await pool.query(
@@ -47,8 +43,6 @@ export const putUpdateTodoOfAList = async (
   todoId: number,
   options: z.infer<typeof putUpdateTodoSchema>
 ) => {
-  await todoBelongsToUser(userId, listId, todoId);
-
   const { title, description, done } = options;
   const updatedTodo = await pool.query(
     `UPDATE todos 
@@ -66,8 +60,6 @@ export const patchUpdateTodoOfAList = async (
   todoId: number,
   options: z.infer<typeof patchUpdateTodoSchema>
 ) => {
-  await todoBelongsToUser(userId, listId, todoId);
-
   const { updates, values, paramCounter } = generateSetQuery(options);
 
   values.push(todoId);
@@ -90,8 +82,6 @@ export const deleteTodoOfAList = async (
   listId: number,
   todoId: number
 ) => {
-  await todoBelongsToUser(userId, listId, todoId);
-
   const result = await pool.query(
     `DELETE FROM todos 
     WHERE id = $1 AND list_id = $2
@@ -113,12 +103,5 @@ export const todoBelongsToUser = async (
     [todoId, listId, userId]
   );
 
-  if ((todoCheck.rowCount ?? 0) === 0) {
-    throw new AppError(
-      "Todo not found or you don't have permission to access it",
-      404
-    );
-  }
-
-  return true;
+  return (todoCheck.rowCount ?? 0) === 0;
 };
