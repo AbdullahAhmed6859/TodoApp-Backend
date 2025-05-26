@@ -1,6 +1,7 @@
 // utils/sendResponse.ts
 import { Response } from "express";
 import { SafeParseError, SafeParseReturnType, ZodError } from "zod";
+import { objToCamelCase } from "./casingCast";
 
 type Data = { [key: string]: any } | null;
 type Errors = object | null;
@@ -36,7 +37,7 @@ export function sendResponse(
 
   const response: ApiResponse = {
     success,
-    data,
+    data: data === null ? data : objToCamelCase(data),
     errors,
     message,
   };
