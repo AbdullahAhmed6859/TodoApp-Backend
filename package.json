@@ -4,9 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc -b",
-    "prestart": "npm run build",
-    "start": "node dist/index.js"
+    "build-code": "tsc -b",
+    "build": "prisma generate && npm run build-code",
+    "start": "node dist/index.js",
+    "predev": "npm run build-code",
+    "dev": "npm run start"
   },
   "repository": {
     "type": "git",
