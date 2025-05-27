@@ -4,6 +4,7 @@ import {
   createListSchema,
   updateListSchema,
 } from "../zod-schemas/todoListSchemas";
+import { AppError } from "../utils/AppError";
 
 export class TodoListService {
   public static async getAllByUserId(id: number) {
@@ -27,6 +28,11 @@ export class TodoListService {
   }
 
   public static async delete(userId: number, id: number) {
+    const todoList = await TodoListService.blongsToUser(userId, id);
+
+    if (!todoList) {
+      throw AppError.notFound("Todo list not found or access denied");
+    }
     return prisma.todoLists.delete({ where: { id, userId } });
   }
 
@@ -35,6 +41,11 @@ export class TodoListService {
     id: number,
     data: z.infer<typeof updateListSchema>
   ) {
+    const todoList = await TodoListService.blongsToUser(userId, id);
+
+    if (!todoList) {
+      throw AppError.notFound("Todo list not found or access denied");
+    }
     return prisma.todoLists.update({ where: { id, userId }, data });
   }
 

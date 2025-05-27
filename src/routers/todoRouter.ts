@@ -3,8 +3,7 @@ import {
   createMyTodo,
   deleteMyTodo,
   getMyTodos,
-  patchUpdateMyTodo,
-  putUpdateMyTodo,
+  updateMyTodo,
 } from "../controllers/todoController";
 
 const router = Router({ mergeParams: true });
@@ -13,8 +12,7 @@ router.route("/").get(getMyTodos).post(createMyTodo);
 
 router
   .route("/:todoId")
-  .put(putUpdateMyTodo)
-  .patch(patchUpdateMyTodo)
+  .patch(updateMyTodo)
   .delete(deleteMyTodo);
 
 export { router as todoRouter };

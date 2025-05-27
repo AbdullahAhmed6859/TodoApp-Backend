@@ -1,5 +1,4 @@
 import { TodoListService } from "../services/todoList.service";
-import { AppError } from "../utils/AppError";
 import { catchAsync } from "../utils/catchAsync";
 import { created, deleted, ok } from "../utils/sendResponse";
 import { idParams } from "../zod-schemas/common";
@@ -35,10 +34,6 @@ export const updateMyList = catchAsync(async (req, res, next) => {
   const { id: listId } = idParams.parse(req.params);
   const data = updateListSchema.parse(req.body);
 
-  if (!(await TodoListService.blongsToUser(userId, listId))) {
-    AppError.forbidden("You donot have permission to access this todo list");
-  }
-
   const updatedList = await TodoListService.update(userId, listId, data);
 
   return ok(res, {
@@ -51,10 +46,6 @@ export const updateMyList = catchAsync(async (req, res, next) => {
 export const deleteMyList = catchAsync(async (req, res, next) => {
   const userId = req.userId as number;
   const { id: listId } = idParams.parse(req.params);
-
-  if (!(await TodoListService.blongsToUser(userId, listId))) {
-    AppError.forbidden("You donot have permission to access this todo list");
-  }
 
   await TodoListService.delete(userId, listId);
 
