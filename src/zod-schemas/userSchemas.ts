@@ -32,4 +32,5 @@ export const patchUserSchema = putUserSchema
   .partial()
   .refine(patchRefine, { message: "Atleast one field must be present" });
 
-export const userIdParams = z.object({ userId: id });
+export const userId = id;
+export const userIdParams = z.object({ userId });

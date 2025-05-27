@@ -1,13 +1,12 @@
 {
   "name": "todoapp-back-end",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "build": "tsc -b",
     "prestart": "npm run build",
-    "start": "node dist/index.js",
-    "db:seed": "ts-node src/scripts/seed.ts"
+    "start": "node dist/index.js"
   },
   "repository": {
     "type": "git",
@@ -27,17 +26,19 @@
     "@types/express": "^5.0.2",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/morgan": "^1.9.9",
-    "@types/pg": "^8.15.2",
+    "@types/node": "^22.15.21",
+    "prisma": "^6.8.2",
+    "tsx": "^4.19.4",
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@prisma/client": "^6.8.2",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
-    "pg": "^8.16.0",
     "zod": "^3.24.4"
   }
 }

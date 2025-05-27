@@ -13,6 +13,6 @@ router.use(protect);
 router.use("/:listId/todos", todoRouter);
 
 router.route("/").get(getMyLists).post(createMyList);
-router.route("/:id").put(updateMyList).delete(deleteMyList);
+router.route("/:id").patch(updateMyList).delete(deleteMyList);
 
 export { router as todoListRouter };
