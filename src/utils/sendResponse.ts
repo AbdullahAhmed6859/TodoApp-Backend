@@ -1,6 +1,5 @@
 import { Response } from "express";
 import { ZodError } from "zod";
-import { objToCamelCase } from "./casingCast";
 
 type Data = { [key: string]: any } | null;
 type Errors = object | null;
@@ -31,7 +30,7 @@ export function sendResponse(
 
   const response: ApiResponse = {
     success,
-    data: data === null ? data : objToCamelCase(data),
+    data,
     errors,
     message,
   };
@@ -64,11 +63,3 @@ export const zodErrorBadRequest = (res: Response, err: ZodError) => {
 
 export const serverError = (res: Response, message = "Unknown error Occured") =>
   sendResponse(res, 500, { message });
-
-function mergeDefaultMessage(
-  options: ResponseOptions = {},
-  defaultOptions: ResponseOptions = {}
-): ResponseOptions {
-  options.message = options.message ?? defaultOptions.message ?? null;
-  return options;
-}
