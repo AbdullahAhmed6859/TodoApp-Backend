@@ -24,7 +24,16 @@ export class UserService {
   }
 
   public static async findByEmail(email: string) {
-    return prisma.users.findUnique({ where: { email } });
+    return prisma.users.findUnique({
+      where: { email },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        password: true,
+      },
+    });
   }
 
   public static async comparePassword(password: string, hash: string) {
