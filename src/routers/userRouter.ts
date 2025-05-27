@@ -4,15 +4,9 @@ import {
   getMyId,
   getUser,
   patchUpdateUser,
-  putUpdateUser,
 } from "../controllers/userController";
 
 const router = Router();
 router.use(protect);
-router
-  .route("/me")
-  .all(getMyId)
-  .get(getUser)
-  .put(putUpdateUser)
-  .patch(patchUpdateUser);
+router.route("/me").all(getMyId).get(getUser).patch(patchUpdateUser);
 export { router as userRouter };
